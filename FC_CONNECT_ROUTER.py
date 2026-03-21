@@ -1,4 +1,3 @@
-\
 """
 FC_CONNECT.py
 
@@ -15,7 +14,10 @@ This avoids "message stealing" between threads.
 from pymavlink import mavutil
 import threading
 import time
+import datetime
 from collections import deque
+
+
 
 # Global kit connection object
 kit_number = None
@@ -90,7 +92,8 @@ def connection_start(kit=None):
         for _ in range(3):
             _set_msg_hz(m, 30, 50)          # ATTITUDE at 30 Hz (>=20 Hz target) (first '30' is message ID for ATTITUDE)
             _set_msg_hz(m, 36, 50)    
-            _set_msg_hz(m,249, 50)      # SERVO_OUTPUT_RAW at 30 Hz          ('36' is message ID for SERVO_OUTPUT_RAW)
+            _set_msg_hz(m,249, 50)  
+            _set_msg_hz(m,251, 50)  # NAMED_VALUE_FLOAT at 50 Hz ('251' is message ID for NAMED_VALUE_FLOAT)
             time.sleep(0.05)
 
         print("[CONNECT] Sucessful message frequency change")
@@ -135,7 +138,7 @@ _latest = {
     "statustext": None,  # (time_now, text, severity)
     "attitude": None,    # (time_now, roll, pitch, yaw)
     "servos": None,      # (time_now, s1..s8)
-    "NAMED_VALUE_FLOAT": None,  # (time_now, name, value)
+    "SENSOR": None,  # (time_now, name, value)
 }
 
 # -----------------------------
@@ -157,14 +160,16 @@ def _router_loop(m):
     # Use a timeout so we can notice stop_event and exit cleanly.
     while not _stop_event.is_set():
         try:
-            msg = m.recv_match(type=["ATTITUDE", "SERVO_OUTPUT_RAW", "HEARTBEAT", "STATUSTEXT","NAMED_VALUE_FLOAT"], blocking=True, timeout=0.01)
+            msg = m.recv_match(type=["ATTITUDE", "SERVO_OUTPUT_RAW", "HEARTBEAT", "NAMED_VALUE_FLOAT"], blocking=True, timeout=0.01)
         except Exception:
             msg = None
 
 
         now = time.time()
         if now - rate_t0 >= 10:
-            print(f"[TELEM_STATS] ATTITUDE={att_n/10} Hz, SERVO_OUTPUT_RAW={srv_n/10} Hz")
+
+            print(f"[TIME] Current time: {datetime.datetime.now().strftime('%H:%M:%S')}")
+            print(f"[TELEM_STATS] ATTITUDE={round(att_n/30, 2)} Hz, SERVO_OUTPUT_RAW={round(srv_n/30, 2)} Hz \n")
             att_n = 0
             srv_n = 0
             rate_t0 = now
@@ -216,12 +221,16 @@ def _router_loop(m):
             with _lock:
                 _latest["heartbeat"] = (time_now, hb)
 
+        # Wait specifically for NAMED_VALUE_FLOAT
         elif mtype == "NAMED_VALUE_FLOAT":
-            # pico sensor circuit
-            name = msg.name.strip('\x00')
-            if name == "AS5600":
-                with _lock:
-                    _latest["NAMED_VALUE_FLOAT"] = (time.time(), name, msg.value)
+            # Clean the string (MAVLink strings are null-terminated)
+            
+            sensor_name = getattr(msg, "name", "").strip('\x00')
+            sensor_value = getattr(msg, "value", None)
+            
+            with _lock:
+                _latest["SENSOR"] = (time_now, sensor_name, sensor_value)
+
 
 
 
@@ -275,9 +284,10 @@ def get_latest_heartbeat():
         return _latest["heartbeat"]
 
 
-def get_latest_sensor():
+def get_latest_sensor():    
     with _lock:
-        return _latest["NAMED_VALUE_FLOAT"]
+        return _latest["SENSOR"]
+    
 
 
 def copy_attitude_history():

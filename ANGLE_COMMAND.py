@@ -18,7 +18,7 @@ def start_override(m):
             return
         _override_active = True
 
-    m.mav.rc_channels_override_send(m.target_system, m.target_component, 1500,1500,0,1500,0,1500,0,0)
+    m.mav.rc_channels_override_send(m.target_system, m.target_component, 1500,1500,0,1500,0,500,0,0)
 
     def loop():
         # 10 Hz is plenty
@@ -57,7 +57,7 @@ def set_rudder(m, angle, yaw_ch=4):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[yaw_ch-1] = int(rudder_atp(angle))
+        _override_ch[yaw_ch-1] = int(def_to_rc(-1*angle, rc_normal, rudder_params))
 
 
 
@@ -70,7 +70,7 @@ def set_elevator(m, angle, pitch_ch=2):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[pitch_ch-1] = int(elevator_atp(angle))
+        _override_ch[pitch_ch-1] = int(def_to_rc(angle, rc_normal, elevator_params))
 
 
 
@@ -82,7 +82,7 @@ def set_p_aileron(m, angle, roll_ch=1):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[roll_ch-1] = int(paileron_atp(angle))
+        _override_ch[roll_ch-1] = int(def_to_rc(angle, rc_normal, paileron_params))
 
 
 
@@ -94,28 +94,28 @@ def set_s_aileron(m, angle, roll_ch=1):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[roll_ch-1] = int(saileron_atp(angle))
+        _override_ch[roll_ch-1] = int(def_to_rc(angle, rc_normal, saileron_params))
 
 
 
 
-def set_p_flap(m, angle, flap_ch=6):
+def set_p_flap(m, angle, flap_ch=5):
     if not _override_active:
         start_override(m)
 
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[flap_ch-1] = int(pflap_atp(angle))
+        _override_ch[flap_ch-1] = int(def_to_rc(angle, rc_flaps, pflap_params))
 
 
 
 
-def set_s_flap(m, angle, flap_ch=6):
+def set_s_flap(m, angle, flap_ch=5):
     if not _override_active:
         start_override(m)
 
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[flap_ch-1] = int(sflap_atp(angle))
+        _override_ch[flap_ch-1] = int(def_to_rc(angle, rc_flaps, sflap_params))
