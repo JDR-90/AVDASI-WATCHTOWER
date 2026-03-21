@@ -2,6 +2,22 @@
 # AVDASI-WATCHTOWER
 University of Bristol Aerospace Engineering: Software intended to retrieve telemetry data and control an ArduPilot/MAVLink drone system. Both Wings and Fuselage each have a separate FC onboard and so is a quasi-unified system
 
+## Version 04.2026.004
+
+- Merged separate folders into a unified script
+
+- ANGLE_CONVERSION — Added linear conversions for port flap and a port flap sensor, and populated the port aileron lookup dictionary with real calibrated values replacing the previous zeros.
+
+- ANGLE_COMMAND — The initial override packet now uses kit-specific neutral values selected based on the connected kit number, replacing the single hardcoded set of values. Port flap now also uses the linear conversion instead of the lookup table.
+
+- FC_CONNECT_ROUTER — The heartbeat wait is restored (previously commented out), with a 5-second timeout added to both the connection and heartbeat calls. Target system and component are now properly set from the heartbeat source again.
+
+- TELEMETRY_CSV_ROUTER — Kit 8 sensor conversion is now wired up to the port flap sensor linear conversion instead of being a placeholder. CSV column headers were also updated to include descriptive names for each servo channel.
+
+- MAIN — The application was renamed to "W.A.T.C.H.T.O.W.E.R - Delta Blaze GUI", a splash screen displaying the watchtower logo was added on startup, and a window icon was set.
+
+- hook-pymavlink — A PyInstaller hook file that ensures all pymavlink submodules are bundled correctly when compiling to an executable.
+
 ## Version 03.2026.003
 
 - Angle to RC conversion separated into 2 separate folders: starboard/empennage & portside. Intend to unify as soon as possible.
