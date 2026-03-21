@@ -61,12 +61,12 @@ class MainWindow(QWidget):
 
         #Angle Limits Dictionary
         self.limits = {
-            "Port Flap": (0, 30),
-            "Port Aileron": (-40, 40),
-            "Starboard Flap": (0, 30),
-            "Starboard Aileron": (-40, 40),
-            "Rudder": (-40, 40),
-            "Elevator": (-45, 45)
+            "Port Flap": (0, 30),                     # 0 to 30
+            "Port Aileron": (-40, 40),                # -40 to 40
+            "Starboard Flap": (0, 30),            # 0 to 30
+            "Starboard Aileron": (-40, 40),         # -40 to 40
+            "Rudder": (-40, 40),                    # -40 to 40
+            "Elevator": (-45, 45)                   # -45 to 45
         }
 
         #Control Surface Dictionary
@@ -222,6 +222,9 @@ class MainWindow(QWidget):
             
             print("[CONNECT] Connected. Starting listener thread...")
             run_status_refresh(self.mavlink)
+            
+            # Start CSV logging with kit-specific sensor conversion
+            start_csv_logging(kit=kit)
 
             self.startPlotSignal.emit()
 
@@ -238,6 +241,14 @@ class MainWindow(QWidget):
             print("Error - Cannot switch modes (no connection)")#
             return
         command_mode(self.mavlink, mode)
+
+
+    def closeEvent(self, event):
+        """
+        Handle window close event to clean up CSV logging.
+        """
+        stop_csv_logging()
+        event.accept()
 
 
     def start_plot_mainthread(self):

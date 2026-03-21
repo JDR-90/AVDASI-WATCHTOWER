@@ -54,6 +54,33 @@ _last_ser_t = None
 _last_sensor_t = None
 
 _t0 = None
+_kit_number = None
+
+def _convert_sensor_value(raw_value, kit):
+    """
+    Convert raw sensor value based on the selected kit.
+    
+    Args:
+        raw_value: The raw sensor reading
+        kit: Kit number (7, 8, or 9)
+    
+    Returns:
+        Converted sensor value
+    """
+    if raw_value is None:
+        return None
+    
+    # Kit-specific calibration/conversion factors
+    # Adjust these values based on actual calibration data for each kit
+    conversions = {
+        7: lambda x: x ,      # Kit 7 Conversion
+        8: lambda x: x ,      # Kit 8 Conversion
+        9: lambda x: x ,      # Kit 9 Conversion
+    }
+    
+    converter = conversions.get(kit, lambda x: x)  # Default: no conversion
+    return converter(raw_value)
+
 
 def _default_csv_path(prefix="telemetry"):
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -100,7 +127,8 @@ def _write_row(trigger_time):
 
     sensor = ""
     if flp_sensor is not None:
-        sensor = "" if flp_sensor[2] is None else flp_sensor[2]
+        raw_sensor = flp_sensor[2]
+        sensor = "" if raw_sensor is None else _convert_sensor_value(raw_sensor, _kit_number)
 
     current_time = datetime.now().strftime("%H:%M:%S")
 
@@ -154,14 +182,21 @@ def _logger_loop(poll_hz=500):
         time.sleep(period)
 
 
-def start_csv_logging(path=None, prefix="telemetry", flush_every=20, poll_hz=200):
+def start_csv_logging(path=None, prefix="telemetry", flush_every=20, poll_hz=200, kit=None):
     """
     Start CSV logging in a background thread.
+    
+    Args:
+        path: Optional CSV file path
+        prefix: Filename prefix (default: "telemetry")
+        flush_every: Number of rows between flushes (default: 20)
+        poll_hz: Polling frequency (default: 200)
+        kit: Kit number (7, 8, or 9). If None, uses kit from FC_CONNECT_ROUTER
 
     Returns the csv path in use.
     """
     global _thread, _csv_file, _csv_writer, _csv_path, _flush_every, _rows_since_flush
-    global _last_att_t, _last_ser_t, _t0
+    global _last_att_t, _last_ser_t, _t0, _kit_number
 
     with _lock:
         if _thread is not None and _thread.is_alive():
@@ -169,6 +204,18 @@ def start_csv_logging(path=None, prefix="telemetry", flush_every=20, poll_hz=200
 
         if path is None:
             path = _default_csv_path(prefix=prefix)
+        
+        # Use provided kit number, or get from FC_CONNECT_ROUTER if available
+        if kit is None:
+            try:
+                _kit_number = FC_CONNECT.kit_number
+            except AttributeError:
+                _kit_number = None
+        else:
+            _kit_number = kit
+        
+        if _kit_number is not None:
+            print(f"[CSV] Sensor conversion enabled for Kit {_kit_number}")
 
         _flush_every = max(1, int(flush_every))
         _rows_since_flush = 0
