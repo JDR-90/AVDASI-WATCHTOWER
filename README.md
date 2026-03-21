@@ -4,6 +4,8 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 ## Version 03.2026.003
 
+- Angle to RC conversion separated into 2 separate folders: starboard/empennage & portside. Intend to unify as soon as possible.
+
 - ANGLE_CONVERSION — Completely replaced the polynomial system with simple linear equations for elevator, rudder, starboard aileron, starboard flap, and a sensor-specific linear conversion. Also added a new sensor linear conversion for Kit 7, and updated the lookup dictionaries with revised calibration values for starboard flap, starboard aileron, and elevator. All polynomial parameters and helper functions were removed.
 
 - ANGLE_COMMAND — Rudder and elevator now use the new linear conversions, starboard aileron and starboard flap also switch to linear, while port aileron and port flap continue using the lookup table approach.
