@@ -1,22 +1,28 @@
-"""
-FC_CONNECT.py
+############################################################
+#####                FC_CONNECT_ROUTER.py              #####
+############################################################
 
-One background thread reads MAVLink messages (recv_match) and stores:
-- Latest status text / heartbeat
-- Rolling history deques for ATTITUDE and SERVO_OUTPUT_RAW
+###
+### Purpose: Provides the connection to the relative cube, extracts the relevant telemetry data and stores in a buffer, 
+###          and provides an API for other modules to access the latest values
+###
+### Script Dependencies: ANGLE_COMMAND.py (for the servo override values)
+###
+### Library Dependencies: pymavlink (for MAVLink communication), threading (for concurrent tasks), time (for timing), datetime (for timestamping), collections (for data buffering)
+###
+### See below for more detail on functionality 
 
-Other parts of the program (UI, telemetry plotter, logger) MUST NOT call recv_match().
-They should read data via the getter functions in this module.
 
-This avoids "message stealing" between threads.
-"""
+
+
+
 
 from pymavlink import mavutil
 import threading
 import time
 import datetime
 from collections import deque
-
+from ANGLE_COMMAND import _override_ch
 
 
 # Global kit connection object
@@ -30,23 +36,27 @@ kit_number = None
 
 def connection_start(kit=None):
     global kit_number
-    """
-    Creates the MAVLink connection and waits for a heartbeat.
-    Returns mavutil connection object (m), or None on failure.
-    """
+
+
+
     if kit is None:
         kit = "7"
     kit = str(kit)
 
+
+    # Connects to the appropriate UDP port based on the kit number and sets initial servo override values.
     if kit == "8":
         kit_number = 8
         m = mavutil.mavlink_connection("udp:0.0.0.0:14558", timeout=5)
+        _override_ch[:] = [1330,1506,0,1605,1114,1114,0,0]
     elif kit == "7":
         kit_number = 7
         m = mavutil.mavlink_connection("udp:0.0.0.0:14557", timeout=5)
+        _override_ch[:] = [1426,1506,0,1605,1184,1184,0,0]
     elif kit == "9":
         kit_number = 9
         m = mavutil.mavlink_connection("udp:0.0.0.0:14559", timeout=5)
+        _override_ch[:] = [1426,1506,0,1605,1183,1183,0,0]
 
     else:
         raise ValueError(f"Unknown kit '{kit}' (expected '7', '8', '9').")
@@ -92,7 +102,7 @@ def connection_start(kit=None):
             _set_msg_hz(m, 30, 50)          # ATTITUDE at 30 Hz (>=20 Hz target) (first '30' is message ID for ATTITUDE)
             _set_msg_hz(m, 36, 50)    
             _set_msg_hz(m,249, 50)  
-            _set_msg_hz(m,251, 50)  # NAMED_VALUE_FLOAT at 50 Hz ('251' is message ID for NAMED_VALUE_FLOAT)
+            _set_msg_hz(m,251, 50)          # NAMED_VALUE_FLOAT at 50 Hz ('251' is message ID for NAMED_VALUE_FLOAT)
             time.sleep(0.05)
 
         print("[CONNECT] Sucessful message frequency change")
@@ -127,7 +137,7 @@ _lock = threading.Lock()
 _stop_event = threading.Event()
 _router_thread = None
 
-# Rolling histories (time, ...)
+# Rolling histories (time, ...) buffers
 _attitude_hist = deque(maxlen=600)  # (time_now, roll, pitch, yaw)
 _servo_hist = deque(maxlen=600)     # (time_now, s1..s8)
 
@@ -141,14 +151,10 @@ _latest = {
 }
 
 # -----------------------------
-# Router loop
+# Router loop - Extracts latest values and adds to the buffers and "_latest" snapshots
 # -----------------------------
 
 def _router_loop(m):
-    """
-    Reads ALL MAVLink messages and routes them into buffers.
-    This must be the only place in your program that calls recv_match().
-    """
 
     # To check message frequency
     att_n = 0
@@ -179,10 +185,10 @@ def _router_loop(m):
         time_now = time.time()
         mtype = msg.get_type()
 
-        # Note: we keep critical sections very short.
+
+        # Attitude data handling: store roll, pitch, yaw in both the latest snapshot and the rolling history buffer.
         if mtype == "ATTITUDE":
             att_n += 1
-
             roll = getattr(msg, "roll", None)
             pitch = getattr(msg, "pitch", None)
             yaw = getattr(msg, "yaw", None)
@@ -191,9 +197,10 @@ def _router_loop(m):
                 _latest["attitude"] = sample
                 _attitude_hist.append(sample)
 
+
+        # Servo output handling: store servo outputs in both the latest snapshot and the rolling history buffer.
         elif mtype == "SERVO_OUTPUT_RAW":
             srv_n += 1
-            # SERVO_OUTPUT_RAW has fields servo1_raw...servo8_raw
             s = []
             for i in range(1, 9):
                 s.append(getattr(msg, f"servo{i}_raw", None))
@@ -202,14 +209,18 @@ def _router_loop(m):
                 _latest["servos"] = sample
                 _servo_hist.append(sample)
 
+
+        # Status text handling: store the latest status text and severity in the snapshot. 
+        # Good for debugging and seeing what parameters are being recived from the cube
         elif mtype == "STATUSTEXT":
             text = getattr(msg, "text", "")
             severity = getattr(msg, "severity", None)
             with _lock:
                 _latest["statustext"] = (time_now, text, severity)
 
+
+        # Heartbeat handling: store the latest heartbeat info in the snapshot.
         elif mtype == "HEARTBEAT":
-            # Store minimal heartbeat info
             hb = {
                 "base_mode": getattr(msg, "base_mode", None),
                 "custom_mode": getattr(msg, "custom_mode", None),
@@ -220,9 +231,8 @@ def _router_loop(m):
             with _lock:
                 _latest["heartbeat"] = (time_now, hb)
 
-        # Wait specifically for NAMED_VALUE_FLOAT
+        # Parameter NAMED_VALUE_FLOAT stores the sensor data. The value stored in the snapshot
         elif mtype == "NAMED_VALUE_FLOAT":
-            # Clean the string (MAVLink strings are null-terminated)
             
             sensor_name = getattr(msg, "name", "").strip('\x00')
             sensor_value = getattr(msg, "value", None)
@@ -234,13 +244,10 @@ def _router_loop(m):
 
 
 # -----------------------------
-# Public API
+# Public API - Functions for accessing the latest values and starting/stopping the router thread.
 # -----------------------------
 
 def run_status_refresh(m, maxlen=600):
-    """
-    Starts the router thread if not already running.
-    """
     global _router_thread, _attitude_hist, _servo_hist
 
     with _lock:
@@ -257,12 +264,11 @@ def run_status_refresh(m, maxlen=600):
 
 
 def stop_router():
-    """
-    Requests the router thread to stop.
-    """
     _stop_event.set()
 
 
+
+# Accessing the latest values
 def get_latest_attitude():
     with _lock:
         return _latest["attitude"]
@@ -288,12 +294,9 @@ def get_latest_sensor():
         return _latest["SENSOR"]
     
 
-
+# Returns a copy of the rolling history buffers for attitude and servo data. Useful for analysis/debugging without affecting the live data collection.
 def copy_attitude_history():
-    """
-    Returns a copy (list) of the rolling attitude history.
-    Safe to use without holding locks elsewhere.
-    """
+
     with _lock:
         return list(_attitude_hist)
 
@@ -303,12 +306,10 @@ def copy_servo_history():
         return list(_servo_hist)
 
 
+
+# dictionary to find the index of the servo corresponding to the control surface name. Time added also for easier debugging 
 def find_servo_pos(cs_name):
-    """
-    Returns the index of the servo corresponding to the control surface name.
-    """
-
-
+    
     dictionary = {
         "time":             0,
         "p_flap":           1,

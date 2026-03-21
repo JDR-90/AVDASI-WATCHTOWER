@@ -1,4 +1,12 @@
-# -*- coding: utf-8 -*-
+############################################################
+#####                     ui_main.py                   #####
+############################################################
+
+### Purpose: Compiled UI file from UIGate3_V2.ui, contains the PyQt6 code for the UI layout and design. This file is imported into MAIN.py to create the UI.
+###
+### Script Dependencies: None
+###
+### Library Dependencies: PySide6 (for the UI)
 
 ################################################################################
 ## Form generated from reading UI file 'UIGate3_V2.ui'
