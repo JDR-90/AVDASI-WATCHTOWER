@@ -1,4 +1,5 @@
-from TELEMETRY_CSV_ROUTER import start_csv_logging, on_plot_close
+from TELEMETRY_CSV_ROUTER import start_csv_logging, on_plot_close, _convert_sensor_value
+import FC_CONNECT_ROUTER as FC_CONNECT
 from FC_CONNECT_ROUTER import (
     connection_start, run_status_refresh, stop_router,
     get_latest_attitude, get_latest_servos, find_servo_pos, get_latest_sensor
@@ -67,7 +68,8 @@ def _update(frame):
         if _last_sns_t is None or t_sns > _last_sns_t:
             _last_sns_t = t_sns
             sensor_time_data.append(t)
-            sensor_data.append(value)
+            converted_value = _convert_sensor_value(value, FC_CONNECT.kit_number)
+            sensor_data.append(converted_value)
     
     # Update artists
     if len(time_attitude)>0:
