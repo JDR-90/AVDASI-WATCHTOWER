@@ -24,7 +24,7 @@ import os
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtWidgets import QSizePolicy, QSplashScreen
 from PySide6.QtCore import Signal, QObject, QTimer, Qt
-from PySide6.QtGui import QFont, QIcon, QPixmap, QMovie
+from PySide6.QtGui import QFont, QIcon, QPixmap
 from ui_main import Ui_Form
 
 from pymavlink import mavutil
@@ -306,13 +306,11 @@ class MainWindow(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
-    # Create and show animated splash screen - purely aesthetic
-    gif_path = os.path.join(os.path.dirname(__file__), "loadanimation.gif")
-    movie = QMovie(gif_path)
-    splash = QSplashScreen()
+    # Create and show splash screen - purely aesthetic
+    png_path = os.path.join(os.path.dirname(__file__), "watchtower.png")
+    pixmap = QPixmap(png_path)
+    splash = QSplashScreen(pixmap)
     splash.setWindowFlags(splash.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
-    movie.frameChanged.connect(lambda: splash.setPixmap(movie.currentPixmap()))
-    movie.start()
     splash.show()
     app.processEvents()
     
