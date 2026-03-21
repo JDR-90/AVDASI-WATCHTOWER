@@ -7,15 +7,18 @@ from ui_main import Ui_Form
 
 from pymavlink import mavutil
 
-from FC_CONNECT import *
+from FC_CONNECT_ROUTER import *
 from MODE_SWITCH import *
-from TELEMETRY import *
+from TELEMETRY_CSV_ROUTER import *
 from ANGLE_COMMAND import *
 from ANGLE_CONVERSION import *
 from FLAP_CONFIG import *
-import time
+from modified_plotting_UPDATED import _run_plot
 
-#MAKE OUTPUT BOX NOT INPUTTABLE
+
+
+#--------------------------------------------------------
+# MAKE OUTPUT BOX NOT INPUTTABLE
 #---------------------------------------------------------
 
 ####################
@@ -35,6 +38,7 @@ class PrintRedirect(QObject):
 ####################
 class MainWindow(QWidget):
     OutputBoxSignal = Signal(str)
+    startPlotSignal = Signal()
 
     def __init__(self):
         super().__init__()
@@ -42,6 +46,11 @@ class MainWindow(QWidget):
         self.ui.setupUi(self)
         self.mavlink = None
         #self.SetupConnection()
+
+        # Plot animation handle
+        self.startPlotSignal.connect(self.start_plot_mainthread)
+        self.plot_anim = None
+
 
         #Redierct print to OutputBox
         self.redirect = PrintRedirect()
@@ -139,14 +148,21 @@ class MainWindow(QWidget):
 
     def backend_connect(self):
         try:
+
             print("[CONNECT] Starting MAVLink connection, wait 3 seconds...")
-            self.mavlink = connection_start()
+            self.mavlink = connection_start('7')
+
             if self.mavlink is None:
                 print("Error - No heartbeat detected")
                 return
+            
             print("[CONNECT] Connected. Starting listener thread...")
-            print(self.mavlink.mode_mapping()) 
             run_status_refresh(self.mavlink)
+
+            self.startPlotSignal.emit()
+
+
+
         except Exception as e:
             print (f"Error - MAVLink connection failed: {e}")
 
@@ -160,6 +176,16 @@ class MainWindow(QWidget):
             print("Error - Cannot switch modes (no connection)")#
             return
         command_mode(self.mavlink, mode)
+
+
+    def start_plot_mainthread(self):
+
+        # Starts the Matplotlib plotting window.
+        # This runs on the Qt main thread via a signal.
+
+        if self.plot_anim is None:
+            self.plot_anim = _run_plot(self.mavlink)
+
 
 
 ####################
