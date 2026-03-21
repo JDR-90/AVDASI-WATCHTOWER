@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'UIGate3.ui'
+## Form generated from reading UI file 'UIGate3_V2.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -50,7 +50,7 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.ControlsLabel)
 
-        self.horizontalSpacer_2 = QSpacerItem(123, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_2 = QSpacerItem(149, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_2)
 
@@ -108,7 +108,7 @@ class Ui_Form(object):
 
         self.Flap.addWidget(self.FlapLabel)
 
-        self.horizontalSpacer = QSpacerItem(14, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer = QSpacerItem(41, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
 
         self.Flap.addItem(self.horizontalSpacer)
 
@@ -176,6 +176,10 @@ class Ui_Form(object):
 
         self.Aileron.addWidget(self.AileronLabel)
 
+        self.horizontalSpacer_3 = QSpacerItem(21, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+
+        self.Aileron.addItem(self.horizontalSpacer_3)
+
         self.AileronEntryPort = QLineEdit(self.layoutWidget)
         self.AileronEntryPort.setObjectName(u"AileronEntryPort")
 
@@ -239,7 +243,7 @@ class Ui_Form(object):
 
         self.Rudder.addWidget(self.RudderLabel)
 
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_4 = QSpacerItem(184, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
 
         self.Rudder.addItem(self.horizontalSpacer_4)
 
@@ -280,7 +284,7 @@ class Ui_Form(object):
 
         self.Elevator.addWidget(self.ElevatorLabel)
 
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_5 = QSpacerItem(179, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
 
         self.Elevator.addItem(self.horizontalSpacer_5)
 
@@ -775,7 +779,9 @@ class Ui_Form(object):
         self.ManualButton.setText(QCoreApplication.translate("Form", u"Manual Mode", None))
         self.RCLabel.setText(QCoreApplication.translate("Form", u"RC Override:", None))
         self.OverrideStartButton.setText(QCoreApplication.translate("Form", u"RC Override Start", None))
+        self.OverrideStartButton.setDescription(QCoreApplication.translate("Form", u"Start code >  RC", None))
         self.OverrideStopButton.setText(QCoreApplication.translate("Form", u"RC Override Stop", None))
+        self.OverrideStopButton.setDescription(QCoreApplication.translate("Form", u"Stop code > RC", None))
         self.KitsLabel.setText(QCoreApplication.translate("Form", u"Kit Connection:", None))
         self.Kit7Connect.setText(QCoreApplication.translate("Form", u"Kit 7 ", None))
         self.Kit8Connect.setText(QCoreApplication.translate("Form", u"Kit 8", None))
