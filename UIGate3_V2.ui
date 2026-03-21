@@ -75,7 +75,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>123</width>
+          <width>149</width>
           <height>20</height>
          </size>
         </property>
@@ -174,7 +174,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>14</width>
+              <width>41</width>
               <height>20</height>
              </size>
             </property>
@@ -257,6 +257,22 @@ QPushButton:pressed {
            </widget>
           </item>
           <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>21</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <widget class="QLineEdit" name="AileronEntryPort"/>
           </item>
           <item>
@@ -333,9 +349,12 @@ QPushButton:pressed {
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>184</width>
               <height>20</height>
              </size>
             </property>
@@ -390,9 +409,12 @@ QPushButton:pressed {
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>179</width>
               <height>20</height>
              </size>
             </property>
@@ -864,6 +886,9 @@ QCommandLinkButton:pressed {
                 <property name="text">
                  <string>RC Override Start</string>
                 </property>
+                <property name="description">
+                 <string>Start code &gt;  RC</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -894,6 +919,9 @@ QCommandLinkButton:pressed {
                 </property>
                 <property name="text">
                  <string>RC Override Stop</string>
+                </property>
+                <property name="description">
+                 <string>Stop code &gt; RC</string>
                 </property>
                </widget>
               </item>
