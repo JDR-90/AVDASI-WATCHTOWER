@@ -15,3 +15,8 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 - TELEMETRY_CSV_ROUTER — Added a Sensor_Raw column to the CSV output for flap angle sensor data alongside the existing attitude and servo columns
 
+
+
+## Version 02.2026.002
+
+- Added temporary calibration scripts to curve fit the data to an nth order polynomial
