@@ -2,6 +2,12 @@
 # AVDASI-WATCHTOWER
 University of Bristol Aerospace Engineering: Software intended to retrieve telemetry data and control an ArduPilot/MAVLink drone system. Both Wings and Fuselage each have a separate FC onboard and so is a quasi-unified system
 
+![Company Logo](https://github.com/user-attachments/assets/e5c6b8b8-5865-4346-a377-82eda833eedc)
+<img width="300" height="300" alt="watchtower" src="https://github.com/user-attachments/assets/fda6af65-95b0-40c1-b9d4-f11155163caa" />
+<img width="600" height="174" alt="UOBLOGO" src="https://github.com/user-attachments/assets/edd9740f-e0b2-4cb3-a7bb-879a86342c4b" />
+
+
+
 ## Version 05.2026.005
 
 - The final version of WATCHTOWER
