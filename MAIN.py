@@ -1,3 +1,22 @@
+############################################################
+#####                     MAIN.py                      #####
+############################################################
+
+###
+### Purpose: Brings together all the modules, sets up the GUI, and provides the main event loop. This is where the application starts.
+###
+### Script Dependencies: FC_CONNECT_ROUTER.py (for the MAVLink connection), MODE_SWITCH.py (for flight mode switching), 
+###                      TELEMETRY_CSV_ROUTER.py (for telemetry logging), ANGLE_COMMAND.py (for sending RC packets), 
+###                      ANGLE_CONVERSION.py (for converting angles to PWM values), PLOTTING.py (for the plotting window)
+###
+### Library Dependencies: PySide6 (for the GUI), pymavlink (for MAVLink communication), threading (for concurrent tasks), 
+###                       time (for timing), sys and os (for system operations)
+###
+### See below for more detail on functionality 
+
+
+
+
 import sys
 import threading
 import os
@@ -5,7 +24,7 @@ import os
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtWidgets import QSizePolicy, QSplashScreen
 from PySide6.QtCore import Signal, QObject, QTimer, Qt
-from PySide6.QtGui import QFont, QIcon, QPixmap
+from PySide6.QtGui import QFont, QIcon, QPixmap, QMovie
 from ui_main import Ui_Form
 
 from pymavlink import mavutil
@@ -17,9 +36,9 @@ from ANGLE_COMMAND import *
 from ANGLE_CONVERSION import *
 from PLOTTING import _run_plot
 
-####################
-#PRINTS SENT TO OUTPUT BOX
-####################
+#############################
+# PRINTS SENT TO OUTPUT BOX #
+#############################
 class PrintRedirect(QObject):
     OutputBoxSignal = Signal(str)
     def write(self, text):
@@ -30,9 +49,9 @@ class PrintRedirect(QObject):
         pass
 
 
-####################
-#MAIN WINDOW SETUP
-####################
+#####################
+# MAIN WINDOW SETUP #
+#####################
 WINDOW_NAME = "W.A.T.C.H.T.O.W.E.R - Delta Blaze GUI"
 font = QFont("Consolas")
 font.setPointSize(10)
@@ -43,6 +62,8 @@ class MainWindow(QWidget):
 
     def __init__(self):
         super().__init__()
+
+        # Set up the UI and connect signals/slots for buttons and entries.
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         font = QFont("Consolas")
@@ -62,13 +83,13 @@ class MainWindow(QWidget):
         self.startPlotSignal.connect(self.start_plot_mainthread)
         self.plot_anim = None
 
-        #Redierct print to OutputBox
+        # Redierct print to OutputBox
         self.redirect = PrintRedirect()
         self.redirect.OutputBoxSignal.connect(self.append_output)
         sys.stdout = self.redirect
         sys.stderr = self.redirect
 
-        #Angle Limits Dictionary
+        # Angle Limits Dictionary
         self.limits = {
             "Port Flap": (0, 30),                   # 0 to 30
             "Port Aileron": (-40, 40),              # -40 to 40
@@ -78,7 +99,7 @@ class MainWindow(QWidget):
             "Elevator": (-45, 45)                   # -45 to 45
         }
 
-        #Control Surface Dictionary
+        # Control Surface Dictionary
         self.surface_funcs = {
             "Port Flap": set_p_flap,
             "Port Aileron": set_p_aileron,
@@ -88,7 +109,7 @@ class MainWindow(QWidget):
             "Elevator": set_elevator
         }
 
-        #Auto flap angle Dictionaries
+        # Flap Angle Dictionaries
         self.port_config = {
                "TO": 20,
                "CR": 0,
@@ -100,7 +121,7 @@ class MainWindow(QWidget):
                "LD": 30
                }
         
-        #Control surface buttons
+        # Control surface buttons
         self.ui.FlapButtonPort.clicked.connect(lambda: self.handle_surface_cmd("Port Flap", self.ui.FlapEntryPort.text()))
         self.ui.AileronButtonPort.clicked.connect(lambda: self.handle_surface_cmd("Port Aileron", self.ui.AileronEntryPort.text()))
         self.ui.FlapButtonStar.clicked.connect(lambda: self.handle_surface_cmd("Starboard Flap", self.ui.FlapEntryStar.text()))
@@ -108,7 +129,7 @@ class MainWindow(QWidget):
         self.ui.RudderButton.clicked.connect(lambda: self.handle_surface_cmd("Rudder", self.ui.RudderEntry.text()))
         self.ui.ElevatorButton.clicked.connect(lambda: self.handle_surface_cmd("Elevator", self.ui.ElevatorEntry.text()))
 
-        #Auto angle buttons
+        # Flap Configuration buttons
         self.ui.PortTakeOff.clicked.connect(lambda:self.handle_AutoAngle("Port Flap", 'P', 'TO'))
         self.ui.PortCruise.clicked.connect(lambda:self.handle_AutoAngle("Port Flap", 'P', 'CR'))
         self.ui.PortLanding.clicked.connect(lambda:self.handle_AutoAngle("Port Flap", 'P', 'LD'))
@@ -116,7 +137,7 @@ class MainWindow(QWidget):
         self.ui.StarCruise.clicked.connect(lambda:self.handle_AutoAngle("Starboard Flap", 'S', 'CR'))
         self.ui.StarLanding.clicked.connect(lambda:self.handle_AutoAngle("Starboard Flap", 'S', 'LD'))
 
-        #Control surface entry
+        # Control surface entry
         self.ui.FlapEntryPort.returnPressed.connect(lambda: self.handle_surface_cmd("Port Flap", self.ui.FlapEntryPort.text()))
         self.ui.AileronEntryPort.returnPressed.connect(lambda: self.handle_surface_cmd("Port Aileron", self.ui.AileronEntryPort.text()))
         self.ui.FlapEntryStar.returnPressed.connect(lambda: self.handle_surface_cmd("Starboard Flap", self.ui.FlapEntryStar.text()))
@@ -124,7 +145,7 @@ class MainWindow(QWidget):
         self.ui.RudderEntry.returnPressed.connect(lambda: self.handle_surface_cmd("Rudder", self.ui.RudderEntry.text()))
         self.ui.ElevatorEntry.returnPressed.connect(lambda: self.handle_surface_cmd("Elevator", self.ui.ElevatorEntry.text()))
 
-        #UAV Control buttons
+        # UAV Control buttons - Flight Modes, RC Override and Kit Connections
         self.ui.FBWBButton.clicked.connect(lambda: self.start_mode_thread('s'))
         self.ui.ManualButton.clicked.connect(lambda: self.start_mode_thread('m'))
 
@@ -136,29 +157,33 @@ class MainWindow(QWidget):
         self.ui.Kit9Connect.clicked.connect(lambda: self.start_connection_thread(9))
         print("DELTA BLAZE - GUI loaded successfully\n")
 
-    #def SetupConnection(self):
-    #    self.ui.ConnectionStartButton.clicked.connect(self.start_connection_thread)
         
-    ####################
-    #DISPLAY ON OUTPUT BOX
-    ####################
+    #########################
+    # DISPLAY ON OUTPUT BOX #
+    #########################
     def append_output(self, text):
         self.ui.OutputBox.append(text)
 
 
-    ####################
-    #ENTRY & BUTTON SETUP
-    ####################
+    ########################
+    # ENTRY & BUTTON SETUP #
+    ########################
+
     def handle_surface_cmd(self, surface, value):
+
         if value == "":
             print(f"{surface}: No value entered")
             return
+        
         try:
             value = float(value)
+
         except ValueError:
             print(f"{surface}: Invalid input '{value}'")
             return
-        #Limits check
+        
+
+        # Limits check
         min, max = self.limits[surface]
         if not (min <= value <= max):
             print(f"{surface}: Value {value}° outside limits ({min} to {max})")
@@ -171,12 +196,15 @@ class MainWindow(QWidget):
                          daemon=True).start()
 
 
+    # Flap Config Handler
     def handle_AutoAngle(self, surface, side, command):
+
         if side == 'P':
             value = self.port_config[command]
             threading.Thread(target=self.backend_surface_cmd,
                          args=(surface, value),
                          daemon=True).start()
+            
         if side == 'S':
             value = self.star_config[command]
             threading.Thread(target=self.backend_surface_cmd,
@@ -184,6 +212,7 @@ class MainWindow(QWidget):
                          daemon=True).start()
 
 
+    # RC Override Handler
     def handle_override(self, command):
         if not self.mavlink:
             print("Error - Cannot send command (no connection)")
@@ -200,25 +229,33 @@ class MainWindow(QWidget):
 
 
     ####################
-    #THREADS
+    #     THREADS      #
     ####################
+
+
+    # RC Control Thread
     def backend_surface_cmd(self, surface, value):
+
         if not self.mavlink:
             print("Error - Cannot send command (no connection)")
             return
         print(f"[CMD] {surface} → {value}°")
+
         try:
             function = self.surface_funcs[surface]
             function(self.mavlink, value)
             print(f"[CMD] {surface} command sent")
+
         except Exception as exception:
             print(f"Error - Failed to send {surface} command")
 
 
+    # Kit Connection Thread - Calls Handler Below
     def start_connection_thread(self, kit):
         threading.Thread(target=self.backend_connect, args=(kit,), daemon=True).start()
 
 
+    # Kit Connection Handler
     def backend_connect(self, kit):
         try:
 
@@ -241,30 +278,24 @@ class MainWindow(QWidget):
             print (f"Error - MAVLink connection failed: {e}")
 
 
+    # Flight mode switching thread - calls handler below
     def start_mode_thread(self, mode):
         threading.Thread(target=self.backend_switch_mode, args=(mode,), daemon=True).start()
         
-
+    # Flight mode switching handler
     def backend_switch_mode(self, mode):
         if not self.mavlink:
             print("Error - Cannot switch modes (no connection)")#
             return
         command_mode(self.mavlink, mode)
 
-
+    # Clean up on close
     def closeEvent(self, event):
-        """
-        Handle window close event to clean up CSV logging.
-        """
         stop_csv_logging()
         event.accept()
 
-
+    # Starts Plotting Window on main thread via signal
     def start_plot_mainthread(self):
-
-        # Starts the Matplotlib plotting window.
-        # This runs on the Qt main thread via a signal.
-
         if self.plot_anim is None:
             self.plot_anim = _run_plot(self.mavlink)
 
@@ -275,11 +306,13 @@ class MainWindow(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
-    # Create and show splash screen
-    splash_path = os.path.join(os.path.dirname(__file__), "watchtower.png")
-    splash_pixmap = QPixmap(splash_path)
-    splash = QSplashScreen(splash_pixmap)
+    # Create and show animated splash screen - purely aesthetic
+    gif_path = os.path.join(os.path.dirname(__file__), "loadanimation.gif")
+    movie = QMovie(gif_path)
+    splash = QSplashScreen()
     splash.setWindowFlags(splash.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+    movie.frameChanged.connect(lambda: splash.setPixmap(movie.currentPixmap()))
+    movie.start()
     splash.show()
     app.processEvents()
     
@@ -288,17 +321,21 @@ if __name__ == "__main__":
     icon_path = os.path.join(os.path.dirname(__file__), "logo.ico")
     window.setWindowIcon(QIcon(icon_path))
     
-    # Show main window
-    window.show()
+    # Show main window after 3.5 seconds
+    def show_window():
+        window.show()
+        # Keep splash on top and visible
+        splash.raise_()
+        splash.activateWindow()
     
-    # Keep splash on top and visible
-    splash.raise_()
-    splash.activateWindow()
+    QTimer.singleShot(3500, show_window)
     
-    # Close splash after 1.5 seconds using Qt timer
+    # Close splash after 3.5 seconds
     def close_splash():
         splash.hide()
     
     QTimer.singleShot(3500, close_splash)
     
+
+    # Start the application event loop
     sys.exit(app.exec())

@@ -1,5 +1,21 @@
+############################################################
+#####                ANGLE_CONVERSION.py               #####
+############################################################
 
-# Linear Enough Conversion, if not here use the dictionaries
+###
+### Purpose: Contains the conversion functions/dictionaries to allow conversion from angle to RC
+###
+### Script Dependencies: None
+###
+### Library Dependencies: None
+###
+### See below for more detail on functionality 
+
+
+
+
+
+# Linear Enough Conversion, if control surface not here use the dictionaries
 
 def elevator_linear(angle):
     return int(1506 + (angle)*5.8372)
@@ -8,7 +24,7 @@ def rudder_linear(angle):
     return int(1605 + (angle)*5.5471)
 
 def saileron_linear(angle):
-    return int(1426.6 + (angle)*6.0912)
+    return int(1425 + (angle)*4.95)
 
 def sflap_linear(angle):
     return int(1184 + (angle)*3.8121)

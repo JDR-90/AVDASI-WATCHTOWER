@@ -1,7 +1,28 @@
+############################################################
+#####                   MODE_SWITCH.py                 #####
+############################################################
+
+###
+### Purpose: Contains the function to send mode change commands to the flight controller via MAVLink, allowing switching between manual and stabilised (FBW-A) modes
+###
+### Script Dependencies: None
+###
+### Library Dependencies: pymavlink (for sending mode change commands)
+###
+### See below for more detail on functionality 
+
+
+
+
+
+
+
 from pymavlink import mavutil
 
 
 def command_mode(m, MODE):
+
+    # 's' for stabilised (FBW-A), 'm' for manual
     if MODE == 's':
         MODE = 'FBWA'
     elif MODE == 'm':

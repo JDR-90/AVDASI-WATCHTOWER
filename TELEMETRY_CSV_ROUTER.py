@@ -1,31 +1,21 @@
-"""
-TELEMETRY_CSV_ROUTER.py
+############################################################
+#####              TELEMETRY_CSV_ROUTER.py             #####
+############################################################
 
-CSV logging that works with the *router pattern*.
+###
+### Purpose: Logs telemetry data to a CSV file, including attitude, servo positions, and sensor readings, with timestamps.
+###
+### Script Dependencies: FC_CONNECT_ROUTER.py (for accessing telemetry API), ANGLE_CONVERSION.py (for converting raw sensor values to calibrated values based on kit-specific conversions)
+###
+### Library Dependencies: csv (for CSV file handling), os (for file path handling), time (for timing), threading (for concurrent logging), datetime (for timestamping), numpy (for data manipulation)
+###
+### See below for more detail on functionality 
 
-- Expects FC_CONNECT_ROUTER to already be running and populating latest snapshots + history buffers.
-- It runs its own lightweight logger thread that polls the router's latest 
-  attitude/servo snapshots and writes merged rows to CSV.
 
 
-Expects API (from FC_CONNECT_ROUTER):
-- get_latest_attitude() -> (t, roll, pitch, yaw) or None
-- get_latest_servos()   -> (t, s1..s8) or None
 
-Usage (from your UI, after router starts):
-    import FC_CONNECT_ROUTER as FC_CONNECT
-    import TELEMETRY_CSV_ROUTER as TLOG
 
-    FC_CONNECT.run_status_refresh(self.mavlink)
-    csv_path = TLOG.start_csv_logging(prefix="telemetry", flush_every=20)
 
-    # on close:
-    TLOG.stop_csv_logging()
-
-Notes:
-- This logger writes a row when it detects a NEW attitude sample or NEW servo sample.
-- Each row is a merged "latest snapshot" at that moment.
-"""
 
 import csv
 import os
@@ -35,10 +25,10 @@ from datetime import datetime
 import numpy as np
 
 import FC_CONNECT_ROUTER as FC_CONNECT
-import Reading_flap_angle as FLP_SENSOR
 import ANGLE_CONVERSION as AC
 
 
+# Global variables for logger state
 _lock = threading.Lock()
 _stop_event = threading.Event()
 _thread = None
@@ -57,38 +47,39 @@ _last_sensor_t = None
 _t0 = None
 _kit_number = None
 
+
+# Converts the Hall Effect Senor raw value to the calibrated value based on the kit number
 def _convert_sensor_value(raw_value, kit):
-    """
-    Convert raw sensor value based on the selected kit.
-    
-    Args:
-        raw_value: The raw sensor reading
-        kit: Kit number (7, 8, or 9)
-    
-    Returns:
-        Converted sensor value
-    """
+
     if raw_value is None:
         return None
     
     # Kit-specific calibration/conversion factors
     # Adjust these values based on actual calibration data for each kit
+
     conversions = {
         7: lambda x: AC.sflap_sensor_linear(x) ,      # Kit 7 Conversion
         8: lambda x: AC.pflap_sensor_linear(x),       # Kit 8 Conversion
         9: lambda x: x,                               # Kit 9 Conversion
     }
     
-    converter = conversions.get(kit, lambda x: x)  # Default: no conversion
+    converter = conversions.get(kit, lambda x: x)  # Finds conversion function for the specified kit or defaults to no conversion
     return converter(raw_value)
 
 
+# Generates a default CSV file path with a timestamp, placed in a telemetry folder in the Documents directory
 def _default_csv_path(prefix="telemetry"):
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(script_dir, f"{prefix}_{ts}.csv")
+    documents_dir = os.path.expanduser("~/Documents")
+    telemetry_dir = os.path.join(documents_dir, "telemetry")
+    
+    # Create the telemetry folder if it doesn't exist
+    os.makedirs(telemetry_dir, exist_ok=True)
+    
+    return os.path.join(telemetry_dir, f"{prefix}_{ts}.csv")
 
 
+# Opens the CSV file and writes the header row. Returns the file object and CSV writer.
 def _open_csv(path):
     f = open(path, "w", newline="")
     w = csv.writer(f)
@@ -102,6 +93,10 @@ def _open_csv(path):
     return f, w
 
 
+# Writes a row of telemetry data to the CSV file based on the latest attitude, servo, and sensor data. 
+# The timestamp is relative to the first logged entry
+# Note that if the data is NoneType, it will be logged as an empty string ("") in the CSV to prevent errors
+
 def _write_row(trigger_time):
     global _rows_since_flush, _t0
 
@@ -110,30 +105,45 @@ def _write_row(trigger_time):
     
     rel_time = trigger_time - _t0
 
+    # Get the latest data for attitude, servos and sensor
     att = FC_CONNECT.get_latest_attitude()
     srv = FC_CONNECT.get_latest_servos()
     flp_sensor = FC_CONNECT.get_latest_sensor()
 
     roll = pitch = yaw = ""
+
+    # converts attitude from radians to degrees and stores in an array to be written to the CSV
     if att is not None:
         roll = "" if att[1] is None else np.degrees(att[1])
         pitch = "" if att[2] is None else np.degrees(att[2])
         yaw = "" if att[3] is None else np.degrees(att[3])
 
+    # Adds servo values to an array to be written to the CSV
     servos = [""] * 8
     if srv is not None:
         for i in range(8):
             v = srv[1 + i]
             servos[i] = "" if v is None else v
 
+    # Converts the raw sensor value to the calibrated value based on the kit number, and stores it in a variable to be written to the CSV
     sensor = ""
     if flp_sensor is not None:
         raw_sensor = flp_sensor[2]
         sensor = "" if raw_sensor is None else _convert_sensor_value(raw_sensor, _kit_number)
 
+
+
     current_time = datetime.now().strftime("%H:%M:%S")
 
+    # Format of the row to be written: [relative time, current time, roll, pitch, yaw, 8 servo values, sensor value]
     row = [rel_time, current_time, roll, pitch, yaw] + servos + [sensor]
+
+
+
+
+    # Attempts to write the row to the CSV file, and flushes the file every "_flush_every" rows. 
+    # If an error occurs during writing or flushing, it is silently ignored to prevent crashes. 
+    # The number of rows since the last flush is tracked with _rows_since_flush.
 
     try:
         _csv_writer.writerow(row)
@@ -144,6 +154,11 @@ def _write_row(trigger_time):
     except Exception:
         pass
 
+
+
+
+# Main loop of the csv logging thread. It continuously polls for new telemetry data at the specified frequency (poll_hz) 
+# and writes it to the CSV file using _write_row() whenever new data is available.
 
 def _logger_loop(poll_hz=500):
     global _last_att_t, _last_ser_t, _last_sensor_t
@@ -183,19 +198,10 @@ def _logger_loop(poll_hz=500):
         time.sleep(period)
 
 
-def start_csv_logging(path=None, prefix="telemetry", flush_every=20, poll_hz=200, kit=None):
-    """
-    Start CSV logging in a background thread.
-    
-    Args:
-        path: Optional CSV file path
-        prefix: Filename prefix (default: "telemetry")
-        flush_every: Number of rows between flushes (default: 20)
-        poll_hz: Polling frequency (default: 200)
-        kit: Kit number (7, 8, or 9). If None, uses kit from FC_CONNECT_ROUTER
 
-    Returns the csv path in use.
-    """
+# Function to start CSV logging. It initializes the CSV file, starts the logger thread, and sets up the necessary state.
+
+def start_csv_logging(path=None, prefix="telemetry", flush_every=20, poll_hz=200, kit=None):
     global _thread, _csv_file, _csv_writer, _csv_path, _flush_every, _rows_since_flush
     global _last_att_t, _last_ser_t, _t0, _kit_number
 
@@ -234,11 +240,9 @@ def start_csv_logging(path=None, prefix="telemetry", flush_every=20, poll_hz=200
     return _csv_path
 
 
+
+# Function to stop CSV logging. It signals the logger thread to stop, waits for it to finish, and closes the CSV file. It also resets the relevant state variables.
 def stop_csv_logging():
-    """
-    Stop the logger thread and close the CSV file.
-    Returns the closed path (or None if not running).
-    """
     global _csv_file, _csv_writer, _csv_path, _thread
 
     with _lock:
