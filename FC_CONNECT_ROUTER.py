@@ -17,39 +17,51 @@ import threading
 import time
 from collections import deque
 
+# Global kit connection object
+kit_number = None
+
+
+
 # -----------------------------
 # Connection
 # -----------------------------
 
 def connection_start(kit=None):
+    global kit_number
     """
     Creates the MAVLink connection and waits for a heartbeat.
     Returns mavutil connection object (m), or None on failure.
     """
     if kit is None:
-        kit = "8"
+        kit = "7"
     kit = str(kit)
 
     if kit == "8":
+        kit_number = 8
         m = mavutil.mavlink_connection("udp:0.0.0.0:14558")
     elif kit == "7":
+        kit_number = 7
         m = mavutil.mavlink_connection("udp:0.0.0.0:14557")
+    elif kit == "9":
+        kit_number = 9
+        m = mavutil.mavlink_connection("udp:0.0.0.0:14559")
+
     else:
-        raise ValueError(f"Unknown kit '{kit}' (expected '7' or '8').")
+        raise ValueError(f"Unknown kit '{kit}' (expected '7', '8', '9').")
 
-    print("[CONNECT] Waiting for heartbeat...")
-    try:
-        hb = m.wait_heartbeat(timeout=10)
-    except Exception as e:
-        print(f"[CONNECT] Heartbeat not received: {e}")
-        return None
+    #print("[CONNECT] Waiting for heartbeat...")
+    #try:
+    #    hb = m.wait_heartbeat(timeout=15)
+    #except Exception as e:
+    #    print(f"[CONNECT] Heartbeat not received: {e}")
+    #    return None
 
-    print("[CONNECT] Heartbeat received.")
+    #print("[CONNECT] Heartbeat received.")
 
     # IMPORTANT: set target sys/comp from the heartbeat source
-    m.target_system = hb.get_srcSystem()
-    m.target_component = hb.get_srcComponent()
-    print(f"[CONNECT] Target set to sys={m.target_system} comp={m.target_component}")
+    #m.target_system = hb.get_srcSystem()
+    #m.target_component = hb.get_srcComponent()
+    #print(f"[CONNECT] Target set to sys={m.target_system} comp={m.target_component}")
 
 
     # After heartbeat received, request faster streams
@@ -77,7 +89,8 @@ def connection_start(kit=None):
 
         for _ in range(3):
             _set_msg_hz(m, 30, 50)          # ATTITUDE at 30 Hz (>=20 Hz target) (first '30' is message ID for ATTITUDE)
-            _set_msg_hz(m, 36, 50)          # SERVO_OUTPUT_RAW at 30 Hz          ('36' is message ID for SERVO_OUTPUT_RAW)
+            _set_msg_hz(m, 36, 50)    
+            _set_msg_hz(m,249, 50)      # SERVO_OUTPUT_RAW at 30 Hz          ('36' is message ID for SERVO_OUTPUT_RAW)
             time.sleep(0.05)
 
         print("[CONNECT] Sucessful message frequency change")
@@ -122,6 +135,7 @@ _latest = {
     "statustext": None,  # (time_now, text, severity)
     "attitude": None,    # (time_now, roll, pitch, yaw)
     "servos": None,      # (time_now, s1..s8)
+    "NAMED_VALUE_FLOAT": None,  # (time_now, name, value)
 }
 
 # -----------------------------
@@ -143,7 +157,7 @@ def _router_loop(m):
     # Use a timeout so we can notice stop_event and exit cleanly.
     while not _stop_event.is_set():
         try:
-            msg = m.recv_match(type=["ATTITUDE", "SERVO_OUTPUT_RAW", "HEARTBEAT", "STATUSTEXT"], blocking=True, timeout=0.5)
+            msg = m.recv_match(type=["ATTITUDE", "SERVO_OUTPUT_RAW", "HEARTBEAT", "STATUSTEXT","NAMED_VALUE_FLOAT"], blocking=True, timeout=0.01)
         except Exception:
             msg = None
 
@@ -202,9 +216,12 @@ def _router_loop(m):
             with _lock:
                 _latest["heartbeat"] = (time_now, hb)
 
-
-
-
+        elif mtype == "NAMED_VALUE_FLOAT":
+            # pico sensor circuit
+            name = msg.name.strip('\x00')
+            if name == "AS5600":
+                with _lock:
+                    _latest["NAMED_VALUE_FLOAT"] = (time.time(), name, msg.value)
 
 
 
@@ -256,6 +273,11 @@ def get_latest_statustext():
 def get_latest_heartbeat():
     with _lock:
         return _latest["heartbeat"]
+
+
+def get_latest_sensor():
+    with _lock:
+        return _latest["NAMED_VALUE_FLOAT"]
 
 
 def copy_attitude_history():

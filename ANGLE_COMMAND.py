@@ -1,68 +1,121 @@
 from pymavlink import mavutil
 from ANGLE_CONVERSION import *
 
+import threading, time
 
-pinlayout = {
-          "p_flap": 1,
-          "p_aileron": 2,
-          "s_flap": 3,
-          "s_aileron": 4,
-          "rudder": 5,
-          "p_elevator": 6,
-          "s_elevator": 7 
-          }
+_override_lock = threading.Lock()
+_override_active = False
+_override_ch = [1500]*8  # last override packet
 
 
 
+# Start a background thread to send override packets at 10 Hz
 
-# flap conrtol has its own script
+def start_override(m):
+    global _override_active
+    with _override_lock:
+        if _override_active:
+            return
+        _override_active = True
 
+    m.mav.rc_channels_override_send(m.target_system, m.target_component, 1500,1500,0,1500,0,1500,0,0)
 
-## MAX:2500 MIN:500  180 degress rotation of servo
-def set_rudder(m, angle):
-    m.mav.command_long_send(
-    m.target_system, m.target_component,
-    mavutil.mavlink.MAV_CMD_DO_SET_SERVO,
-    0,
-    pinlayout['rudder'],
-    rudder_atp(angle),
-    0,0,0,0,0)
-    
-def set_elevator(m, angle):
-    m.mav.command_long_send(
-    m.target_system, m.target_component,
-    mavutil.mavlink.MAV_CMD_DO_SET_SERVO,
-    0,
-    pinlayout['p_elevator'],
-    elevator_atp(angle),
-    0,0,0,0,0)
+    def loop():
+        # 10 Hz is plenty
+        while True:
+            with _override_lock:
+                if not _override_active:
+                    break
+                ch = _override_ch.copy()
+            m.mav.rc_channels_override_send(m.target_system, m.target_component, *ch)
+            time.sleep(0.1)
 
-
-    m.mav.command_long_send(
-    m.target_system, m.target_component,
-    mavutil.mavlink.MAV_CMD_DO_SET_SERVO,
-    0,
-    pinlayout['s_elevator'],
-    elevator_atp(angle),
-    0,0,0,0,0)
+    threading.Thread(target=loop, daemon=True).start()
 
 
-# Note to self: MAKE P AND S AILERON ALTERNATE IN SIGN FOR CORRECT FUNCTION
-def set_aileron(m, angle):
-    m.mav.command_long_send(
-    m.target_system, m.target_component,
-    mavutil.mavlink.MAV_CMD_DO_SET_SERVO,
-    0,
-    pinlayout['p_aileron'],
-    pflap_atp(-1*angle),
-    0,0,0,0,0)
-    
-    m.mav.command_long_send(
-    m.target_system, m.target_component,
-    mavutil.mavlink.MAV_CMD_DO_SET_SERVO,
-    0,
-    pinlayout['s_aileron'],
-    sflap_atp(angle),
-    0,0,0,0,0)
 
 
+# Stop sending override packets
+def stop_override(m):
+    global _override_active
+    with _override_lock:
+        _override_active = False
+        _override_ch[:] = [0]*8
+    # send once to clear immediately
+    m.mav.rc_channels_override_send(m.target_system, m.target_component, 0,0,0,0,0,0,0,0)
+
+
+
+
+# Functions to set angles for each control surface
+
+def set_rudder(m, angle, yaw_ch=4):
+
+    if not _override_active:
+        start_override(m)
+
+    # call this when UI sends a new command
+    with _override_lock:
+        
+        _override_ch[yaw_ch-1] = int(rudder_atp(angle))
+
+
+
+
+def set_elevator(m, angle, pitch_ch=2):
+
+    if not _override_active:
+        start_override(m)
+
+    # call this when UI sends a new command
+    with _override_lock:
+        
+        _override_ch[pitch_ch-1] = int(elevator_atp(angle))
+
+
+
+
+def set_p_aileron(m, angle, roll_ch=1):
+    if not _override_active:
+        start_override(m)
+
+    # call this when UI sends a new command
+    with _override_lock:
+        
+        _override_ch[roll_ch-1] = int(paileron_atp(angle))
+
+
+
+
+def set_s_aileron(m, angle, roll_ch=1):
+    if not _override_active:
+        start_override(m)
+
+    # call this when UI sends a new command
+    with _override_lock:
+        
+        _override_ch[roll_ch-1] = int(saileron_atp(angle))
+
+
+
+
+def set_p_flap(m, angle, flap_ch=6):
+    if not _override_active:
+        start_override(m)
+
+    # call this when UI sends a new command
+    with _override_lock:
+        
+        _override_ch[flap_ch-1] = int(pflap_atp(angle))
+
+
+
+
+def set_s_flap(m, angle, flap_ch=6):
+    if not _override_active:
+        start_override(m)
+
+    # call this when UI sends a new command
+    with _override_lock:
+        
+        _override_ch[flap_ch-1] = int(sflap_atp(angle))
