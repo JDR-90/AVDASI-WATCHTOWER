@@ -3,7 +3,7 @@ from pymavlink import mavutil
 
 def command_mode(m, MODE):
     if MODE == 's':
-        MODE = 'FBWB'
+        MODE = 'FBWA'
     elif MODE == 'm':
         MODE = 'MANUAL'
 

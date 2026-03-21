@@ -15,12 +15,6 @@ from ANGLE_COMMAND import *
 from ANGLE_CONVERSION import *
 from PLOTTING import _run_plot
 
-#-----------TO-DO-----------
-#Connection works on this end and sends kit, edit FC_CONNECT_ROUTER to select kit not assume 8
-#Colour code messages
-#Update UI spacing etc.
-
-
 ####################
 #PRINTS SENT TO OUTPUT BOX
 ####################
@@ -109,9 +103,9 @@ class MainWindow(QWidget):
         self.ui.PortTakeOff.clicked.connect(lambda:self.handle_AutoAngle("Port Flap", 'P', 'TO'))
         self.ui.PortCruise.clicked.connect(lambda:self.handle_AutoAngle("Port Flap", 'P', 'CR'))
         self.ui.PortLanding.clicked.connect(lambda:self.handle_AutoAngle("Port Flap", 'P', 'LD'))
-        self.ui.StarTakeOff.clicked.connect(lambda:self.handle_AutoAngle("Star Flap", 'S', 'TO'))
-        self.ui.StarCruise.clicked.connect(lambda:self.handle_AutoAngle("Star Flap", 'S', 'CR'))
-        self.ui.StarLanding.clicked.connect(lambda:self.handle_AutoAngle("Star Flap", 'S', 'LD'))
+        self.ui.StarTakeOff.clicked.connect(lambda:self.handle_AutoAngle("Starboard Flap", 'S', 'TO'))
+        self.ui.StarCruise.clicked.connect(lambda:self.handle_AutoAngle("Starboard Flap", 'S', 'CR'))
+        self.ui.StarLanding.clicked.connect(lambda:self.handle_AutoAngle("Starboard Flap", 'S', 'LD'))
 
         #Control surface entry
         self.ui.FlapEntryPort.returnPressed.connect(lambda: self.handle_surface_cmd("Port Flap", self.ui.FlapEntryPort.text()))

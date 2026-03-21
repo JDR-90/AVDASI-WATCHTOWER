@@ -57,11 +57,45 @@ def linear(param, x):
     return  param[0] + param[1] * x
 
 
-def def_to_rc(deflection, rc_param, cs_param, rc_input = False):
+def def_to_rc(deflection, rc_param, cs_param):
+    return linear(rc_param, polynomial(cs_param, deflection))
 
-    if not rc_input:
-        return linear(rc_param, polynomial(cs_param, deflection))
+
+
+while True:
+    control_surface = input("Enter control surface (PF, PA, SF, SA, R, E): ").upper()
+    angle = float(input("Enter deflection angle in degrees: "))
+
+    if control_surface == "PF":
+        rc_value = round(def_to_rc(angle, rc_flaps, pflap_params))
+        print(f"Port Flap RC Value: {rc_value}")
+        print()
+
+    elif control_surface == "PA":
+        rc_value = round(def_to_rc(angle, rc_normal, paileron_params))
+        print(f"Port Aileron RC Value: {rc_value}")
+        print()
+
+    elif control_surface == "SF":
+        rc_value = round(def_to_rc(angle, rc_flaps, sflap_params))
+        print(f"Starboard Flap RC Value: {rc_value}")
+        print()
     
-    if rc_input:
-        return deflection
+    elif control_surface == "SA":
+        rc_value = round(def_to_rc(angle, rc_normal, saileron_params))
+        print(f"Starboard Aileron RC Value: {rc_value}")
+        print()
+    
+    elif control_surface == "R":
+        rc_value = round(def_to_rc(-1*angle, rc_normal, rudder_params))
+        print(f"Rudder RC Value: {rc_value}")
+        print()
 
+    elif control_surface == "E":
+        rc_value = round(def_to_rc(angle, rc_normal, elevator_params))
+        print(f"Elevator RC Value: {rc_value}")
+        print()
+
+    else:
+        print("Invalid control surface. Please enter PF, PA, SF, SA, R, or E.")
+        continue

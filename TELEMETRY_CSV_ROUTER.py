@@ -1,4 +1,3 @@
-\
 """
 TELEMETRY_CSV_ROUTER.py
 
@@ -29,13 +28,14 @@ Notes:
 """
 
 import csv
+import os
 import time
 import threading
 from datetime import datetime
 import numpy as np
 
 import FC_CONNECT_ROUTER as FC_CONNECT
-
+import Reading_flap_angle as FLP_SENSOR
 
 
 _lock = threading.Lock()
@@ -57,7 +57,8 @@ _t0 = None
 
 def _default_csv_path(prefix="telemetry"):
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{prefix}_{ts}.csv"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(script_dir, f"{prefix}_{ts}.csv")
 
 
 def _open_csv(path):
@@ -65,6 +66,7 @@ def _open_csv(path):
     w = csv.writer(f)
     w.writerow([
         "rel_time",
+        "current_time",
         "roll", "pitch", "yaw",
         "servo1", "servo2", "servo3", "servo4", "servo5", "servo6", "servo7", "servo8", "Sensor_Raw"
     ])
@@ -100,8 +102,9 @@ def _write_row(trigger_time):
     if flp_sensor is not None:
         sensor = "" if flp_sensor[2] is None else flp_sensor[2]
 
+    current_time = datetime.now().strftime("%H:%M:%S")
 
-    row = [rel_time, roll, pitch, yaw] + servos + [sensor]
+    row = [rel_time, current_time, roll, pitch, yaw] + servos + [sensor]
 
     try:
         _csv_writer.writerow(row)

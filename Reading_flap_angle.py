@@ -10,4 +10,5 @@ def get_flap_angle(connection):
     
         if sensor_name == "AS5600":
             return msg.value
+    
     return None
