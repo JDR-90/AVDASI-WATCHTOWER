@@ -24,17 +24,19 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(900, 586)
-        Form.setMaximumSize(QSize(900, 16777215))
         Form.setStyleSheet(u"")
+        self.mainLayout = QVBoxLayout(Form)
+        self.mainLayout.setObjectName(u"mainLayout")
         self.layoutWidget = QWidget(Form)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(4, 16, 891, 562))
+        self.layoutWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.mainLayout.addWidget(self.layoutWidget)
         self.verticalLayout_3 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalSpacer_6 = QSpacerItem(230, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_6)
 
@@ -71,7 +73,7 @@ class Ui_Form(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.horizontalSpacer_8 = QSpacerItem(163, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer_8)
 
@@ -84,7 +86,7 @@ class Ui_Form(object):
         font1.setUnderline(True)
         self.PortLabel.setFont(font1)
 
-        self.horizontalLayout_5.addWidget(self.PortLabel)
+        self.horizontalLayout_5.addWidget(self.PortLabel, 0, Qt.AlignCenter)
 
         self.StarLabel = QLabel(self.layoutWidget)
         self.StarLabel.setObjectName(u"StarLabel")
@@ -93,7 +95,7 @@ class Ui_Form(object):
         font2.setUnderline(True)
         self.StarLabel.setFont(font2)
 
-        self.horizontalLayout_5.addWidget(self.StarLabel)
+        self.horizontalLayout_5.addWidget(self.StarLabel, 0, Qt.AlignCenter)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout_5)
@@ -176,7 +178,7 @@ class Ui_Form(object):
 
         self.Aileron.addWidget(self.AileronLabel)
 
-        self.horizontalSpacer_3 = QSpacerItem(21, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_3 = QSpacerItem(21, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.Aileron.addItem(self.horizontalSpacer_3)
 
@@ -243,7 +245,7 @@ class Ui_Form(object):
 
         self.Rudder.addWidget(self.RudderLabel)
 
-        self.horizontalSpacer_4 = QSpacerItem(184, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.Rudder.addItem(self.horizontalSpacer_4)
 
@@ -284,7 +286,7 @@ class Ui_Form(object):
 
         self.Elevator.addWidget(self.ElevatorLabel)
 
-        self.horizontalSpacer_5 = QSpacerItem(179, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.Elevator.addItem(self.horizontalSpacer_5)
 
@@ -317,7 +319,7 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.Elevator)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
@@ -331,7 +333,7 @@ class Ui_Form(object):
 
         self.PortTakeOff = QCommandLinkButton(self.layoutWidget)
         self.PortTakeOff.setObjectName(u"PortTakeOff")
-        self.PortTakeOff.setMaximumSize(QSize(100, 16777215))
+        self.PortTakeOff.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.PortTakeOff.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -355,7 +357,7 @@ class Ui_Form(object):
 
         self.PortCruise = QCommandLinkButton(self.layoutWidget)
         self.PortCruise.setObjectName(u"PortCruise")
-        self.PortCruise.setMaximumSize(QSize(100, 16777215))
+        self.PortCruise.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.PortCruise.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -379,7 +381,7 @@ class Ui_Form(object):
 
         self.PortLanding = QCommandLinkButton(self.layoutWidget)
         self.PortLanding.setObjectName(u"PortLanding")
-        self.PortLanding.setMaximumSize(QSize(100, 16777215))
+        self.PortLanding.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.PortLanding.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -414,7 +416,7 @@ class Ui_Form(object):
 
         self.StarTakeOff = QCommandLinkButton(self.layoutWidget)
         self.StarTakeOff.setObjectName(u"StarTakeOff")
-        self.StarTakeOff.setMaximumSize(QSize(100, 16777215))
+        self.StarTakeOff.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.StarTakeOff.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -437,7 +439,7 @@ class Ui_Form(object):
 
         self.StarCruise = QCommandLinkButton(self.layoutWidget)
         self.StarCruise.setObjectName(u"StarCruise")
-        self.StarCruise.setMaximumSize(QSize(100, 16777215))
+        self.StarCruise.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.StarCruise.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -460,7 +462,7 @@ class Ui_Form(object):
 
         self.StarLanding = QCommandLinkButton(self.layoutWidget)
         self.StarLanding.setObjectName(u"StarLanding")
-        self.StarLanding.setMaximumSize(QSize(100, 16777215))
+        self.StarLanding.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.StarLanding.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -484,7 +486,7 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_6)
 
-        self.verticalSpacer = QSpacerItem(20, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
@@ -494,7 +496,7 @@ class Ui_Form(object):
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.horizontalLayout_13 = QHBoxLayout()
         self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
-        self.horizontalSpacer_9 = QSpacerItem(240, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_13.addItem(self.horizontalSpacer_9)
 
@@ -521,7 +523,7 @@ class Ui_Form(object):
 
         self.FBWBButton = QCommandLinkButton(self.layoutWidget)
         self.FBWBButton.setObjectName(u"FBWBButton")
-        self.FBWBButton.setMaximumSize(QSize(183, 16777215))
+        self.FBWBButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.FBWBButton.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -543,7 +545,7 @@ class Ui_Form(object):
 
         self.ManualButton = QCommandLinkButton(self.layoutWidget)
         self.ManualButton.setObjectName(u"ManualButton")
-        self.ManualButton.setMaximumSize(QSize(182, 16777215))
+        self.ManualButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.ManualButton.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -582,7 +584,7 @@ class Ui_Form(object):
 
         self.OverrideStartButton = QCommandLinkButton(self.layoutWidget)
         self.OverrideStartButton.setObjectName(u"OverrideStartButton")
-        self.OverrideStartButton.setMaximumSize(QSize(184, 16777215))
+        self.OverrideStartButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.OverrideStartButton.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -604,7 +606,7 @@ class Ui_Form(object):
 
         self.OverrideStopButton = QCommandLinkButton(self.layoutWidget)
         self.OverrideStopButton.setObjectName(u"OverrideStopButton")
-        self.OverrideStopButton.setMaximumSize(QSize(184, 16777215))
+        self.OverrideStopButton.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.OverrideStopButton.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -637,7 +639,7 @@ class Ui_Form(object):
 
         self.Kit7Connect = QCommandLinkButton(self.layoutWidget)
         self.Kit7Connect.setObjectName(u"Kit7Connect")
-        self.Kit7Connect.setMaximumSize(QSize(121, 16777215))
+        self.Kit7Connect.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.Kit7Connect.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -661,7 +663,7 @@ class Ui_Form(object):
 
         self.Kit8Connect = QCommandLinkButton(self.layoutWidget)
         self.Kit8Connect.setObjectName(u"Kit8Connect")
-        self.Kit8Connect.setMaximumSize(QSize(121, 16777215))
+        self.Kit8Connect.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.Kit8Connect.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -684,7 +686,7 @@ class Ui_Form(object):
 
         self.Kit9Connect = QCommandLinkButton(self.layoutWidget)
         self.Kit9Connect.setObjectName(u"Kit9Connect")
-        self.Kit9Connect.setMaximumSize(QSize(121, 16777215))
+        self.Kit9Connect.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.Kit9Connect.setStyleSheet(u"QCommandLinkButton {\n"
 "    background-color: #4b4b4b;\n"
 "    color: white;\n"
@@ -714,6 +716,10 @@ class Ui_Form(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_8)
 
+        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer_3)
+
 
         self.horizontalLayout_3.addLayout(self.verticalLayout)
 
@@ -723,7 +729,6 @@ class Ui_Form(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.OutputBox = QTextEdit(self.layoutWidget)
         self.OutputBox.setObjectName(u"OutputBox")
-        self.OutputBox.setMaximumSize(QSize(400, 16777215))
         self.OutputBox.setStyleSheet(u"QTextEdit {\n"
 "    background-color: #ececec;\n"
 "    border: 2px solid #4b4b4b;\n"
@@ -740,8 +745,11 @@ class Ui_Form(object):
 
         self.horizontalLayout_3.addLayout(self.verticalLayout_2)
 
+        self.horizontalLayout_3.setStretch(0, 1)
+        self.horizontalLayout_3.setStretch(1, 1)
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
+        self.verticalLayout_3.setStretch(1, 1)
 
 
         self.retranslateUi(Form)

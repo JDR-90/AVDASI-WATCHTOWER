@@ -6,8 +6,11 @@ import threading, time
 
 _override_lock = threading.Lock()
 _override_active = False
-_override_ch = [1454,1506,0,1605,1183,1183,0,0]  # last override packet, rc8 (mode toggle) always 0 to keep manual mode
+_override_ch = [1330,1506,0,1605,1114,1114,0,0]  # change depending on the kit, CURRENTLY: 8
 
+# KIT 7 : [1426,1506,0,1605,1184,1184,0,0]
+# KIT 8 : [1330,1506,0,1605,1114,1114,0,0]
+# KIT 9 : [1426,1506,0,1605,1183,1183,0,0]
 
 
 # Start a background thread to send override packets at 10 Hz
@@ -19,17 +22,17 @@ def start_override(m):
             return
         _override_active = True
 
-    #if kit_number == 7:
-    #    flap = 1183
-    #    ail = 1454
-    #elif kit_number == 8:
-    #    flap = 500
-    #    ail = 1500
-    #elif kit_number == 9:
-    #    flap = 500
-    #    ail = 1500
+
+    # When connection starts, set all channels to neutral based on the kit connection
+    if kit_number == 7:
+        m.mav.rc_channels_override_send(m.target_system, m.target_component, 1426,1506,0,1605,1184,1184,0,0)
+        
+    elif kit_number == 8:
+        m.mav.rc_channels_override_send(m.target_system, m.target_component, 1330,1506,0,1605,1114,1114,0,0)
+        
+    elif kit_number == 9:
+        m.mav.rc_channels_override_send(m.target_system, m.target_component, 1426,1506,0,1605,1183,1183,0,0)
     
-    m.mav.rc_channels_override_send(m.target_system, m.target_component, 1454,1506,0,1605,1183,1183,0,0) # CHANGE '1183' BETWEEN S WING AND P WING BEFORE WIND TUNNEL TEST!!!!!!!!
 
     def loop():
         # 10 Hz is plenty
@@ -117,7 +120,7 @@ def set_p_flap(m, angle, flap_ch=5):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[flap_ch-1] = int(pflap_deflection_get(angle))
+        _override_ch[flap_ch-1] = pflap_linear(angle)
 
 
 

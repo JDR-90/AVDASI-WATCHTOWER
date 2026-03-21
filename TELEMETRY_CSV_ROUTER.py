@@ -75,7 +75,7 @@ def _convert_sensor_value(raw_value, kit):
     # Adjust these values based on actual calibration data for each kit
     conversions = {
         7: lambda x: AC.sflap_sensor_linear(x) ,      # Kit 7 Conversion
-        8: lambda x: x,                               # Kit 8 Conversion
+        8: lambda x: AC.pflap_sensor_linear(x),       # Kit 8 Conversion
         9: lambda x: x,                               # Kit 9 Conversion
     }
     
@@ -96,7 +96,7 @@ def _open_csv(path):
         "rel_time",
         "current_time",
         "roll", "pitch", "yaw",
-        "servo1", "servo2", "servo3", "servo4", "servo5", "servo6", "servo7", "servo8", "Sensor_Raw"
+        "P_Flap (s1)", "P_Ail (s2)", "S_Flap (s3)", "S_Ail (s4)", "Rudder (s5)", "P_Elv (s6)", "S_Elv (s7)", "Sensor_Rel"
     ])
     f.flush()
     return f, w

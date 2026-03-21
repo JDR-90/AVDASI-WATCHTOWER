@@ -40,30 +40,29 @@ def connection_start(kit=None):
 
     if kit == "8":
         kit_number = 8
-        m = mavutil.mavlink_connection("udp:0.0.0.0:14558")
+        m = mavutil.mavlink_connection("udp:0.0.0.0:14558", timeout=5)
     elif kit == "7":
         kit_number = 7
-        m = mavutil.mavlink_connection("udp:0.0.0.0:14557")
+        m = mavutil.mavlink_connection("udp:0.0.0.0:14557", timeout=5)
     elif kit == "9":
         kit_number = 9
-        m = mavutil.mavlink_connection("udp:0.0.0.0:14559")
+        m = mavutil.mavlink_connection("udp:0.0.0.0:14559", timeout=5)
 
     else:
         raise ValueError(f"Unknown kit '{kit}' (expected '7', '8', '9').")
 
-    #print("[CONNECT] Waiting for heartbeat...")
-    #try:
-    #    hb = m.wait_heartbeat(timeout=15)
-    #except Exception as e:
-    #    print(f"[CONNECT] Heartbeat not received: {e}")
-    #    return None
-
-    #print("[CONNECT] Heartbeat received.")
+    print("[CONNECT] Waiting for heartbeat...")
+    try:
+        hb = m.wait_heartbeat(timeout=5)
+    except Exception as e:
+        print(f"[CONNECT] Heartbeat not received: {e}")
+        return None
 
     # IMPORTANT: set target sys/comp from the heartbeat source
-    #m.target_system = hb.get_srcSystem()
-    #m.target_component = hb.get_srcComponent()
-    #print(f"[CONNECT] Target set to sys={m.target_system} comp={m.target_component}")
+    m.target_system = hb.get_srcSystem()
+    m.target_component = hb.get_srcComponent()
+    print(f"[CONNECT] Heartbeat received.")
+    print(f"[CONNECT] Target set to sys={m.target_system} comp={m.target_component}")
 
 
     # After heartbeat received, request faster streams

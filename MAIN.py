@@ -1,9 +1,11 @@
 import sys
 import threading
+import os
 
 from PySide6.QtWidgets import QApplication, QWidget
-from PySide6.QtCore import Signal, QObject
-from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QSizePolicy, QSplashScreen
+from PySide6.QtCore import Signal, QObject, QTimer, Qt
+from PySide6.QtGui import QFont, QIcon, QPixmap
 from ui_main import Ui_Form
 
 from pymavlink import mavutil
@@ -31,6 +33,7 @@ class PrintRedirect(QObject):
 ####################
 #MAIN WINDOW SETUP
 ####################
+WINDOW_NAME = "W.A.T.C.H.T.O.W.E.R - Delta Blaze GUI"
 font = QFont("Consolas")
 font.setPointSize(10)
 
@@ -47,6 +50,12 @@ class MainWindow(QWidget):
         self.ui.OutputBox.setReadOnly(True)
         self.ui.OutputBox.setFont(font)
         self.mavlink = None
+        
+        # Set window title
+        self.setWindowTitle(WINDOW_NAME)
+        
+        # Make window auto-adjustable in size
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         #.SetupConnection()
 
         #Plot animation handle
@@ -265,6 +274,31 @@ class MainWindow(QWidget):
 ####################
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    
+    # Create and show splash screen
+    splash_path = os.path.join(os.path.dirname(__file__), "watchtower.png")
+    splash_pixmap = QPixmap(splash_path)
+    splash = QSplashScreen(splash_pixmap)
+    splash.setWindowFlags(splash.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
+    splash.show()
+    app.processEvents()
+    
+    # Initialize main window
     window = MainWindow()
+    icon_path = os.path.join(os.path.dirname(__file__), "logo.ico")
+    window.setWindowIcon(QIcon(icon_path))
+    
+    # Show main window
     window.show()
+    
+    # Keep splash on top and visible
+    splash.raise_()
+    splash.activateWindow()
+    
+    # Close splash after 1.5 seconds using Qt timer
+    def close_splash():
+        splash.hide()
+    
+    QTimer.singleShot(3500, close_splash)
+    
     sys.exit(app.exec())
