@@ -2,7 +2,17 @@
 # AVDASI-WATCHTOWER
 University of Bristol Aerospace Engineering: Software intended to retrieve telemetry data and control an ArduPilot/MAVLink drone system. Both Wings and Fuselage each have a separate FC onboard and so is a quasi-unified system
 
+## Version 03.2026.002
 
+- ANGLE_CONVERSION — Added lookup dictionaries of manually measured RC values for all six control surfaces (starboard flap, starboard aileron, rudder, elevator, and placeholder dictionaries for port side), alongside getter functions that look up the correct RC value from these tables. The polynomial conversion is now bypassed by default, with a note to revert before wind tunnel testing.
+
+- ANGLE_COMMAND — The initial override packet was updated with real calibrated neutral RC values for each channel. Rudder, elevator, starboard aileron, and starboard flap now use the lookup table approach instead of the polynomial conversion, while port aileron and port flap still use the polynomial method.
+
+- MAIN — CSV logging is now started from the connection handler and passes the kit number through, and a window close handler was added to ensure the CSV logger shuts down cleanly when the application exits.
+
+- TELEMETRY_CSV_ROUTER — Added a kit-specific sensor conversion system with per-kit calibration hooks (currently identity conversions, ready to be filled in), and the logging startup now accepts and stores the kit number to apply the correct conversion to sensor readings.
+
+- PLOTTING — The sensor plot now passes the raw sensor value through the kit-specific conversion before displaying it, using the kit number from the router.
 
 ## Version 03.2026.001
 
