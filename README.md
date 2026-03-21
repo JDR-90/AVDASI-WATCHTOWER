@@ -2,6 +2,26 @@
 # AVDASI-WATCHTOWER
 University of Bristol Aerospace Engineering: Software intended to retrieve telemetry data and control an ArduPilot/MAVLink drone system. Both Wings and Fuselage each have a separate FC onboard and so is a quasi-unified system
 
+## Version 05.2026.005
+
+- The final version of WATCHTOWER
+
+- ANGLE_COMMAND — Removed the kit-specific initial override packet logic from the connection handler, replacing it with a zeroed default that gets set correctly by FC_CONNECT_ROUTER on connection. Added detailed comments throughout explaining the purpose of each function.
+
+- ANGLE_CONVERSION — Minor recalibration of the starboard aileron linear conversion constants. Comments added throughout.
+
+- FC_CONNECT_ROUTER — Now imports the override channel list directly from ANGLE_COMMAND and sets the kit-specific neutral values into it at connection time, centralising neutral value assignment. Comments added throughout.
+
+- MAIN — The splash screen was replaced with an animated GIF loader, and the main window is now hidden until the splash closes after 3.5 seconds rather than being shown immediately. Comments and section headers added throughout.
+
+- PLOTTING — Removed the unused mavlink imports, added detailed comments throughout explaining each section's purpose.
+
+- TELEMETRY_CSV_ROUTER — CSV files now save to a dedicated telemetry folder inside the user's Documents directory rather than the script directory, creating the folder if it doesn't exist. Removed the import of Reading_flap_angle. Comments added throughout.
+
+- hook-pymavlink — Now also collects pymavlink data files in addition to submodules, ensuring all assets are bundled when compiling to an executable.
+
+- MODE_SWITCH — Comments added, otherwise unchanged.
+
 ## Version 04.2026.004
 
 - Merged separate folders into a unified script
