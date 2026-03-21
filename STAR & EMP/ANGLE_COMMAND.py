@@ -6,7 +6,7 @@ import threading, time
 
 _override_lock = threading.Lock()
 _override_active = False
-_override_ch = [1454,1506,0,1605,1183,1183,0,0]  # last override packet, rc8 (mode) always 0 to keep manual mode
+_override_ch = [1454,1506,0,1605,1183,1183,0,0]  # last override packet, rc8 (mode toggle) always 0 to keep manual mode
 
 
 
@@ -68,12 +68,12 @@ def set_rudder(m, angle, yaw_ch=4):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[yaw_ch-1] = int(rudder_deflection_get(angle))
+        _override_ch[yaw_ch-1] = int(rudder_linear(angle))
 
 
 
 
-def set_elevator(m, angle, pitch_ch=2, rc_input=True):
+def set_elevator(m, angle, pitch_ch=2):
 
     if not _override_active:
         start_override(m)
@@ -81,7 +81,7 @@ def set_elevator(m, angle, pitch_ch=2, rc_input=True):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[pitch_ch-1] = int(elevator_deflection_get(angle))
+        _override_ch[pitch_ch-1] = int(elevator_linear(angle))
 
 
 
@@ -93,19 +93,19 @@ def set_p_aileron(m, angle, roll_ch=1):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[roll_ch-1] = int(def_to_rc(angle, rc_normal, paileron_params))
+        _override_ch[roll_ch-1] = int(pail_deflection_get(angle))
 
 
 
 
-def set_s_aileron(m, angle, roll_ch=1, rc_input=True):
+def set_s_aileron(m, angle, roll_ch=1):
     if not _override_active:
         start_override(m)
 
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[roll_ch-1] = int(sail_deflection_get(angle))
+        _override_ch[roll_ch-1] = saileron_linear(angle)
 
 
 
@@ -117,16 +117,16 @@ def set_p_flap(m, angle, flap_ch=5):
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[flap_ch-1] = int(def_to_rc(angle, rc_flaps, pflap_params))
+        _override_ch[flap_ch-1] = int(pflap_deflection_get(angle))
 
 
 
 
-def set_s_flap(m, angle, flap_ch=5, rc_input=True):
+def set_s_flap(m, angle, flap_ch=5):
     if not _override_active:
         start_override(m)
 
     # call this when UI sends a new command
     with _override_lock:
         
-        _override_ch[flap_ch-1] = int(sflap_deflection_get(angle))
+        _override_ch[flap_ch-1] = sflap_linear(angle)

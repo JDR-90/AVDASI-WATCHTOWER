@@ -36,6 +36,7 @@ import numpy as np
 
 import FC_CONNECT_ROUTER as FC_CONNECT
 import Reading_flap_angle as FLP_SENSOR
+import ANGLE_CONVERSION as AC
 
 
 _lock = threading.Lock()
@@ -73,9 +74,9 @@ def _convert_sensor_value(raw_value, kit):
     # Kit-specific calibration/conversion factors
     # Adjust these values based on actual calibration data for each kit
     conversions = {
-        7: lambda x: x ,      # Kit 7 Conversion
-        8: lambda x: x ,      # Kit 8 Conversion
-        9: lambda x: x ,      # Kit 9 Conversion
+        7: lambda x: AC.sflap_sensor_linear(x) ,      # Kit 7 Conversion
+        8: lambda x: x,                               # Kit 8 Conversion
+        9: lambda x: x,                               # Kit 9 Conversion
     }
     
     converter = conversions.get(kit, lambda x: x)  # Default: no conversion

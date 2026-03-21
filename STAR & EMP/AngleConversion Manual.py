@@ -50,101 +50,6 @@ rc_flaps = [1000, 9.642]
 rc_normal = [1500, 4.7817]
 
 
-
-
-# CONVERSION DICTIONARIES
-sflap_dict = {
-    0: 1183,
-    5: 1190,
-    10: 1218,
-    15: 1245,
-    20: 1259,
-    25: 1274,
-    30: 1293
-}
-
-saileron_dict = {
-    -40:    1285,
-    -30:    1333,
-    -20:    1355,
-    -10:    1415,
-    0:      1460,
-    10:     1512,
-    20:     1579,
-    30:     1600,
-    40:     1645
-}
-
-
-
-pflap_dict = {
-    0:      0,
-    5:      0,
-    10:     0,
-    15:     0,
-    20:     0,
-    25:     0,
-    30:     0
-}
-
-paileron_dict = {
-    -40:    0,
-    -30:    0,
-    -20:    0,
-    -10:    0,
-    0:      0,
-    10:     0,
-    20:     0,
-    30:     0,
-    40:     0
-}
-
-
-rudder_dict = {
-    -40:    1390,
-    -35:    1423,
-    -30:    1448,
-    -25:    1470,
-    -20:    1501,
-    -15:    1530,
-    -10:    1545,
-    -5:     1570,
-    0:      1605,
-    5:      1626,
-    10:     1670,
-    15:     1703,
-    20:     1725,
-    25:     1750,
-    30:     1774,
-    35:     1800,
-    40:     1840
-}
-
-elevator_dict = {
-    -45:    1258,
-    -40:    1274,
-    -35:    1302,
-    -30:    1325,
-    -25:    1363,
-    -20:    1388,
-    -15:    1426,
-    -10:    1455,
-    -5:     1485,
-    0:      1506,
-    5:      1536,
-    10:     1563,
-    15:     1600,
-    20:     1618,
-    25:     1652,
-    30:     1687,
-    35:     1711,
-    40:     1746,
-    45:     1777
-}
-
-
-
-
 def polynomial(parameters, x):
     return sum(coef * (x ** i) for i, coef in enumerate(parameters))
 
@@ -152,31 +57,45 @@ def linear(param, x):
     return  param[0] + param[1] * x
 
 
-def def_to_rc(deflection, rc_param, cs_param, rc_input = True): #REMEMBER TO CHANGE BACK TO FALSE
+def def_to_rc(deflection, rc_param, cs_param):
+    return linear(rc_param, polynomial(cs_param, deflection))
 
-    if not rc_input:
-        return linear(rc_param, polynomial(cs_param, deflection))
+
+
+while True:
+    control_surface = input("Enter control surface (PF, PA, SF, SA, R, E): ").upper()
+    angle = float(input("Enter deflection angle in degrees: "))
+
+    if control_surface == "PF":
+        rc_value = round(def_to_rc(angle, rc_flaps, pflap_params))
+        print(f"Port Flap RC Value: {rc_value}")
+        print()
+
+    elif control_surface == "PA":
+        rc_value = round(def_to_rc(angle, rc_normal, paileron_params))
+        print(f"Port Aileron RC Value: {rc_value}")
+        print()
+
+    elif control_surface == "SF":
+        rc_value = round(def_to_rc(angle, rc_flaps, sflap_params))
+        print(f"Starboard Flap RC Value: {rc_value}")
+        print()
     
-    if rc_input:
-        return deflection
+    elif control_surface == "SA":
+        rc_value = round(def_to_rc(angle, rc_normal, saileron_params))
+        print(f"Starboard Aileron RC Value: {rc_value}")
+        print()
+    
+    elif control_surface == "R":
+        rc_value = round(def_to_rc(-1*angle, rc_normal, rudder_params))
+        print(f"Rudder RC Value: {rc_value}")
+        print()
 
+    elif control_surface == "E":
+        rc_value = round(def_to_rc(angle, rc_normal, elevator_params))
+        print(f"Elevator RC Value: {rc_value}")
+        print()
 
-
-
-def sflap_deflection_get(item):
-    return sflap_dict.get(item, 1183)
-
-def sail_deflection_get(item):
-    return saileron_dict.get(item, 1183)
-
-def pflap_deflection_get(item):
-    return pflap_dict.get(item, 1183)
-
-def pail_deflection_get(item):
-    return paileron_dict.get(item, 1183)
-
-def rudder_deflection_get(item):
-    return rudder_dict.get(item, 1605)
-
-def elevator_deflection_get(item):
-    return elevator_dict.get(item, 1506)
+    else:
+        print("Invalid control surface. Please enter PF, PA, SF, SA, R, or E.")
+        continue
