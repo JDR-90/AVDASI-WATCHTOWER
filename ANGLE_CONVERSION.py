@@ -1,7 +1,7 @@
 
 
 # Temporary angle to PWM conversion 
-def angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=int, max_angle=int):
+def angle_to_pwm(angle, min_pwm=1000, max_pwm=2000, min_angle=int, max_angle=int):
     """
     Convert an angle in degrees to a PWM signal.
 
@@ -26,7 +26,7 @@ def angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=int, max_angle=int)
     return int(pwm)
 
 
-def pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=int, max_angle=int):
+def pwm_to_angle(pwm, min_pwm=1000, max_pwm=2000, min_angle=int, max_angle=int):
     """
     Convert a PWM signal to an angle in degrees.
 
@@ -57,22 +57,22 @@ def pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=int, max_angle=int):
 ### atp = angle to pwm ###
 
 def pflap_atp(angle):
-    return angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=0, max_angle=30)
+    return angle_to_pwm(angle, min_angle=0, max_angle=30)
 
 def sflap_atp(angle):
-    return angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=0, max_angle=30)
+    return angle_to_pwm(angle, min_angle=0, max_angle=30)
 
 def paileron_atp(angle):
-    return angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=-40, max_angle=40)
+    return angle_to_pwm(angle, min_angle=-40, max_angle=40)
 
 def saileron_atp(angle):
-    return angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=-40, max_angle=40)
+    return angle_to_pwm(angle, min_angle=-40, max_angle=40)
 
 def rudder_atp(angle):
-    return angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=-40, max_angle=40)
+    return angle_to_pwm(angle, min_angle=-40, max_angle=40)
 
 def elevator_atp(angle):
-    return angle_to_pwm(angle, min_pwm=500, max_pwm=2500, min_angle=-45, max_angle=45)
+    return angle_to_pwm(angle, min_angle=-45, max_angle=45)
 
 
 
@@ -81,20 +81,20 @@ def elevator_atp(angle):
 ### pta = pwm to angle ###
 
 def pflap_pta(pwm):
-    return pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=0, max_angle=30)
+    return pwm_to_angle(pwm, min_pwm=800, max_pwm=2500, min_angle=0, max_angle=30)
 
 def sflap_pta(pwm):
-    return pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=0, max_angle=30)
+    return pwm_to_angle(pwm, min_pwm=800, max_pwm=2500, min_angle=0, max_angle=30)
 
 def paileron_pta(pwm):
-    return pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=-40, max_angle=40)
+    return pwm_to_angle(pwm, min_pwm=800, max_pwm=2500, min_angle=-40, max_angle=40)
 
 def saileron_pta(pwm):
-    return pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=-40, max_angle=40)
+    return pwm_to_angle(pwm, min_pwm=800, max_pwm=2500, min_angle=-40, max_angle=40)
 
 def rudder_pta(pwm):
-    return pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=-40, max_angle=40)
+    return pwm_to_angle(pwm, min_pwm=800, max_pwm=2500, min_angle=-40, max_angle=40)
 
 def elevator_pta(pwm):
-    return pwm_to_angle(pwm, min_pwm=500, max_pwm=2500, min_angle=-45, max_angle=45)
+    return pwm_to_angle(pwm, min_pwm=800, max_pwm=2500, min_angle=-45, max_angle=45)
 

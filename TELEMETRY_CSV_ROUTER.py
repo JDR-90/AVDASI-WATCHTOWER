@@ -51,6 +51,7 @@ _rows_since_flush = 0
 
 _last_att_t = None
 _last_ser_t = None
+_last_sensor_t = None
 
 _t0 = None
 
@@ -65,7 +66,7 @@ def _open_csv(path):
     w.writerow([
         "rel_time",
         "roll", "pitch", "yaw",
-        "servo1", "servo2", "servo3", "servo4", "servo5", "servo6", "servo7", "servo8"
+        "servo1", "servo2", "servo3", "servo4", "servo5", "servo6", "servo7", "servo8", "Sensor_Raw"
     ])
     f.flush()
     return f, w
@@ -81,6 +82,7 @@ def _write_row(trigger_time):
 
     att = FC_CONNECT.get_latest_attitude()
     srv = FC_CONNECT.get_latest_servos()
+    flp_sensor = FC_CONNECT.get_latest_sensor()
 
     roll = pitch = yaw = ""
     if att is not None:
@@ -94,8 +96,12 @@ def _write_row(trigger_time):
             v = srv[1 + i]
             servos[i] = "" if v is None else v
 
+    sensor = ""
+    if flp_sensor is not None:
+        sensor = "" if flp_sensor[2] is None else flp_sensor[2]
 
-    row = [rel_time, roll, pitch, yaw] + servos
+
+    row = [rel_time, roll, pitch, yaw] + servos + [sensor]
 
     try:
         _csv_writer.writerow(row)
@@ -108,7 +114,7 @@ def _write_row(trigger_time):
 
 
 def _logger_loop(poll_hz=500):
-    global _last_att_t, _last_ser_t
+    global _last_att_t, _last_ser_t, _last_sensor_t
 
     poll_hz = max(10, int(poll_hz))
     period = 1.0 / poll_hz
@@ -116,6 +122,7 @@ def _logger_loop(poll_hz=500):
     while not _stop_event.is_set():
         att = FC_CONNECT.get_latest_attitude()
         srv = FC_CONNECT.get_latest_servos()
+        flp_sensor = FC_CONNECT.get_latest_sensor()
 
         wrote = False
 
@@ -132,6 +139,14 @@ def _logger_loop(poll_hz=500):
                 _last_ser_t = t_srv
                 if not wrote or t_srv != _last_att_t:
                     _write_row(t_srv)
+                    wrote=True
+
+        if flp_sensor is not None:
+            t_flp = flp_sensor[0]
+            if _last_sensor_t is None or t_flp > _last_sensor_t:
+                _last_sensor_t = t_flp
+                if not wrote or t_flp != _last_att_t:
+                    _write_row(t_flp)
 
         time.sleep(period)
 
