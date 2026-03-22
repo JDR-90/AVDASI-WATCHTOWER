@@ -4,7 +4,7 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 ![Company Logo](https://github.com/user-attachments/assets/e5c6b8b8-5865-4346-a377-82eda833eedc)
 <img width="300" height="300" alt="watchtower" src="https://github.com/user-attachments/assets/fda6af65-95b0-40c1-b9d4-f11155163caa" />
-<img width="600" height="174" alt="UOBLOGO" src="https://github.com/user-attachments/assets/edd9740f-e0b2-4cb3-a7bb-879a86342c4b" />
+<img width="800" height="250" alt="UOBLOGO (1)" src="https://github.com/user-attachments/assets/4b11e2eb-85fe-4673-80ad-3330b5a18605" />
 
 
 
