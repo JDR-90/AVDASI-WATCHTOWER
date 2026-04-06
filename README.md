@@ -18,7 +18,7 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 - FC_CONNECT_ROUTER — Now imports the override channel list directly from ANGLE_COMMAND and sets the kit-specific neutral values into it at connection time, centralising neutral value assignment. Comments added throughout.
 
-- MAIN — The splash screen was replaced with an animated GIF loader, and the main window is now hidden until the splash closes after 3.5 seconds rather than being shown immediately. Comments and section headers added throughout.
+- MAIN — Comments and section headers added throughout.
 
 - PLOTTING — Removed the unused mavlink imports, added detailed comments throughout explaining each section's purpose.
 
