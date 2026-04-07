@@ -70,12 +70,12 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 - ANGLE_CONVERSION — Replaced the simple linear PWM conversion with a polynomial calibration system using experimentally fitted curves for all six control surfaces.
 
-- ANGLE_COMMAND — All surface setters now use the new polynomial calibration to convert deflection angles to RC signals instead of the old linear approach. The flap channel was also changed from 6 to 5, and the initial override packet was updated accordingly.
+- ANGLE_COMMAND — All control surfaces now use the new polynomial calibration to convert deflection angles to RC signals instead of the old linear approach. The flap channel was changed from 6 to 5, and the initial override packet was updated accordingly.
 
 - AngleConversion_Manual — A standalone command-line tool for manually calculating the RC signal for any control surface given a desired deflection angle.
 
-- FC_CONNECT_ROUTER — Now also requests the sensor message type at 50Hz on connection, prints the current wall-clock time alongside telemetry rate stats, and accepts any sensor name through the router rather than filtering for the AS5600 specifically.
-
+- FC_CONNECT_ROUTER — Now also requests the sensor message type at 50Hz on connection, prints the current GMT time alongside telemetry rate stats.
+  
 - MODE_SWITCH — The stabilised flight mode was changed from FBWB to FBWA.
 
 - MAIN — Fixed a bug where the starboard auto-angle preset buttons were passing the wrong surface name, which would have caused a key lookup failure.
