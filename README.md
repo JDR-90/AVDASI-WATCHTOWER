@@ -8,7 +8,7 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 
 
-## Version 05.2026.005
+## Version 03.2026.005
 
 - The final version of WATCHTOWER
 
@@ -28,7 +28,7 @@ University of Bristol Aerospace Engineering: Software intended to retrieve telem
 
 - MODE_SWITCH — Comments added, otherwise unchanged.
 
-## Version 04.2026.004
+## Version 03.2026.004
 
 - Merged separate folders into a unified script
 
